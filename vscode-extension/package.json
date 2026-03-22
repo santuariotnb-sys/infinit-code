@@ -2,7 +2,7 @@
   "name": "infinit-code",
   "displayName": "Infinit Code",
   "description": "Live Preview para HTML, CSS & React no VS Code — com AI Chat, smart snippets, cloud sync e auto-setup para Claude Code Pro.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "infinitcode",
   "license": "MIT",
   "icon": "media/icon.png",

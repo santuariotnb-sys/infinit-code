@@ -73,7 +73,7 @@
       "properties": {
         "infinit.apiEndpoint": {
           "type": "string",
-          "default": "https://infinitcode.dev/api",
+          "default": "https://app-infinitcode.netlify.app/api",
           "description": "API endpoint for license validation and Pro features."
         },
         "infinit.autoPreview": {

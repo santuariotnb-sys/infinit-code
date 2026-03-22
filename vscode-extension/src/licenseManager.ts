@@ -13,7 +13,7 @@ export class LicenseManager {
   private _apiBase: string;
 
   constructor(private context: vscode.ExtensionContext) {
-    this._apiBase = vscode.workspace.getConfiguration('infinit').get('apiEndpoint') || 'https://infinitcode.dev/api';
+    this._apiBase = vscode.workspace.getConfiguration('infinit').get('apiEndpoint') || 'https://app-infinitcode.netlify.app/api';
   }
 
   /** Called on extension activate — silently validates stored key */

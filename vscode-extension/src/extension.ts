@@ -54,7 +54,7 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('infinit.openChat', () => {
       if (!license.isPro()) {
         vscode.window.showWarningMessage('AI Chat requires Infinit Code Pro.', 'Upgrade').then(v => {
-          if (v) vscode.env.openExternal(vscode.Uri.parse('https://infinitcode.dev/#pricing'));
+          if (v) vscode.env.openExternal(vscode.Uri.parse('https://infinitcode.netlify.app/#pricing'));
         });
         return;
       }
@@ -67,7 +67,7 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('infinit.openSnippets', () => {
       if (!license.isPro()) {
         vscode.window.showWarningMessage('Snippets library requires Infinit Code Pro.', 'Upgrade').then(v => {
-          if (v) vscode.env.openExternal(vscode.Uri.parse('https://infinitcode.dev/#pricing'));
+          if (v) vscode.env.openExternal(vscode.Uri.parse('https://infinitcode.netlify.app/#pricing'));
         });
         return;
       }

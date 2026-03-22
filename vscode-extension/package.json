@@ -1,0 +1,110 @@
+{
+  "name": "infinit-code",
+  "displayName": "Infinit Code",
+  "description": "Live Preview para HTML, CSS & React no VS Code — com AI Chat, smart snippets, cloud sync e auto-setup para Claude Code Pro.",
+  "version": "0.1.0",
+  "publisher": "infinitcode",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/santuariotnb-sys/infinit-code"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization",
+    "Snippets"
+  ],
+  "keywords": [
+    "live preview",
+    "html preview",
+    "react preview",
+    "claude code",
+    "ai",
+    "lovable",
+    "snippets"
+  ],
+  "activationEvents": [
+    "onLanguage:html",
+    "onLanguage:typescriptreact",
+    "onLanguage:javascriptreact"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "infinit.preview",
+        "title": "Infinit: Live Preview",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "infinit.activateLicense",
+        "title": "Infinit: Activate Pro License"
+      },
+      {
+        "command": "infinit.openChat",
+        "title": "Infinit: AI Chat",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "infinit.openSnippets",
+        "title": "Infinit: Snippets Library",
+        "icon": "$(symbol-snippet)"
+      },
+      {
+        "command": "infinit.setup",
+        "title": "Infinit: Run Pro Setup"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "infinit.preview",
+          "when": "resourceLangId =~ /html|typescriptreact|javascriptreact/",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Infinit Code",
+      "properties": {
+        "infinit.apiEndpoint": {
+          "type": "string",
+          "default": "https://infinitcode.dev/api",
+          "description": "API endpoint for license validation and Pro features."
+        },
+        "infinit.autoPreview": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically update preview when switching supported files."
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "infinit.preview",
+        "key": "ctrl+shift+p",
+        "mac": "cmd+shift+p",
+        "when": "resourceLangId =~ /html|typescriptreact|javascriptreact/"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
+    "watch": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --watch",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
+  }
+}

@@ -1,5 +1,5 @@
 [build]
-  publish = "public"
+  publish = "."
 
 # Headers corretos para os scripts serem executáveis via curl/irm
 [[headers]]

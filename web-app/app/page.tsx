@@ -8,7 +8,7 @@ export default function LandingPage() {
   const router = useRouter();
 
   const handleCTA = () => {
-    router.push(session ? '/dashboard' : '/auth/login');
+    router.push(session ? '/ide' : '/auth/login');
   };
 
   return (

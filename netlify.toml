@@ -1,3 +1,4 @@
 [build]
-  base = "landing"
-  publish = "landing"
+  base = "landing/"
+  publish = "landing/"
+  command = "echo 'Static site, no build needed'"

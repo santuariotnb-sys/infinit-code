@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { SessionProvider2 } from './providers';
 
 export const metadata: Metadata = {
-  title: 'Infinit Code',
-  description: 'Saia da Lovable. Código profissional com Claude Code.',
+  title: 'Infinit Code — Web IDE com Claude Code',
+  description: 'IDE profissional no browser. Editor Monaco, terminal cloud, live preview e Claude Code integrado. Sem instalar nada.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

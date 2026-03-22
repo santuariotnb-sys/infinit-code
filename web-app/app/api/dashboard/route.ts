@@ -33,11 +33,11 @@ export async function GET() {
       .single(),
     supabase
       .from('subscriptions')
-      .select('status, current_period_end, pagarme_subscription_id')
+      .select('status, current_period_end, stripe_subscription_id')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single(),
+      .maybeSingle(),
   ]);
 
   return NextResponse.json({
@@ -49,7 +49,6 @@ export async function GET() {
     subscription: subscription ? {
       status: subscription.status,
       currentPeriodEnd: subscription.current_period_end,
-      pagarmeSubscriptionId: subscription.pagarme_subscription_id,
     } : null,
   });
 }

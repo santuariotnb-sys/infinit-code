@@ -29,7 +29,7 @@ export async function createMachine(userId: string): Promise<FlyMachine> {
       name: `ide-${userId.slice(0, 8)}-${Date.now()}`,
       region: 'gru',
       config: {
-        image: `registry.fly.io/${FLY_APP_NAME}:deployment-01KMB1JDGBATC4BBHZZJX9B9Q5`,
+        image: process.env.FLY_IMAGE_REF || `registry.fly.io/${FLY_APP_NAME}:deployment-01KMB1JDGBATC4BBHZZJX9B9Q5`,
         guest: {
           cpu_kind: 'shared',
           cpus: 1,

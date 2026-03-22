@@ -30,6 +30,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'repo and machineSessionId required' }, { status: 400 });
   }
 
+  // Validate repo format: only allow "owner/repo" with safe characters
+  const repoRegex = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
+  if (!repoRegex.test(repo)) {
+    return NextResponse.json({ error: 'Invalid repo format. Must be owner/repo' }, { status: 400 });
+  }
+
   // Busca user
   const { data: user } = await supabase
     .from('users')
@@ -60,14 +66,16 @@ export async function POST(req: NextRequest) {
     .update({ github_repo: repo })
     .eq('id', machineSessionId);
 
-  // Monta o comando git clone com token embutido (HTTPS auth)
-  // O token é passado via URL para autenticar no clone de repos privados
-  const cloneUrl = `https://${githubToken}@github.com/${repo}.git`;
+  // Monta o comando git clone usando credential helper (token nunca aparece na URL)
   const repoName = repo.split('/').pop();
-  const cloneCommand = `cd /home/coder/project && git clone ${cloneUrl} ${repoName} && cd ${repoName} && git config user.email "${session.user.email}" && git config user.name "${session.user.name || 'Infinit Code User'}" && echo "\\n✓ Repo clonado com sucesso!"`;
+  const sanitize = (s: string) => s.replace(/[^a-zA-Z0-9@._\- ]/g, '');
+  const safeEmail = sanitize(session.user.email || '');
+  const safeName = sanitize(session.user.name || 'Infinit Code User');
+  const cloneCommand = `cd /home/coder/project && git -c credential.helper='!f() { echo "password=\${GH_TOKEN}"; echo "username=x-access-token"; }; f' clone https://github.com/${repo}.git ${repoName} && cd ${repoName} && git config user.email "${safeEmail}" && git config user.name "${safeName}" && echo "\\n✓ Repo clonado com sucesso!"`;
 
   return NextResponse.json({
     command: cloneCommand,
+    env: { GH_TOKEN: githubToken },
     repoName,
     repo,
   });

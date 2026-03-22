@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Infinit Code — Live Preview Extension for VS Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050710;
+  --bg2:#0b0f1e;
+  --panel:#0f1428;
+  --border:#1c2340;
+  --accent:#5B6CF9;
+  --accent2:#3EEDB0;
+  --accent3:#F7C948;
+  --text:#E8EAF6;
+  --muted:#5A6080;
+  --mono:'Space Mono',monospace;
+  --sans:'Syne',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;cursor:none}
+
+/* CURSOR */
+#cur{position:fixed;width:12px;height:12px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .12s,background .2s;mix-blend-mode:screen}
+#cur2{position:fixed;width:36px;height:36px;border:1px solid var(--accent);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:transform .25s ease,width .2s,height .2s;opacity:.4}
+body:hover #cur{transform:translate(-50%,-50%) scale(1)}
+
+/* NOISE */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 40px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:12px;font-family:var(--sans);font-weight:800;font-size:18px;letter-spacing:-.5px}
+.logo-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:grid;place-items:center;font-size:18px;color:#fff}
+nav a{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;transition:color .2s}
+nav a:hover{color:var(--text)}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-cta{background:var(--accent);color:#fff!important;padding:8px 20px;border-radius:6px;font-size:12px!important;transition:background .2s!important}
+.nav-cta:hover{background:#4a5ce0!important}
+
+/* HERO */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 40px 80px;overflow:hidden}
+.hero-glow{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(91,108,249,.18) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-60%);pointer-events:none}
+.hero-glow2{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(62,237,176,.08) 0%,transparent 70%);bottom:10%;right:15%;pointer-events:none}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(91,108,249,.12);border:1px solid rgba(91,108,249,.3);border-radius:100px;padding:6px 16px;font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:32px;animation:fadeUp .6s ease both}
+.badge-dot{width:6px;height:6px;background:var(--accent2);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+h1{font-size:clamp(48px,8vw,92px);font-weight:800;line-height:.95;letter-spacing:-3px;animation:fadeUp .7s .1s ease both;max-width:900px}
+h1 em{font-style:normal;color:var(--accent)}
+h1 .line2{color:var(--accent2)}
+.hero-sub{font-family:var(--mono);font-size:15px;color:var(--muted);max-width:520px;line-height:1.7;margin:28px auto 48px;animation:fadeUp .7s .2s ease both}
+.hero-sub span{color:var(--text)}
+.cta-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeUp .7s .3s ease both}
+.btn-primary{background:var(--accent);color:#fff;padding:14px 32px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:transform .2s,box-shadow .2s}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(91,108,249,.4)}
+.btn-ghost{border:1px solid var(--border);color:var(--text);padding:14px 32px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;transition:border-color .2s,background .2s}
+.btn-ghost:hover{border-color:var(--accent);background:rgba(91,108,249,.06)}
+.hero-note{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:20px;animation:fadeUp .7s .4s ease both}
+
+/* CODE PREVIEW WINDOW */
+.editor-wrap{position:relative;max-width:960px;width:100%;margin:80px auto 0;animation:fadeUp .8s .5s ease both}
+.editor-win{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.6)}
+.editor-bar{background:#0d1122;padding:14px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.dot{width:12px;height:12px;border-radius:50%}
+.dot.r{background:#FF5F57}
+.dot.y{background:#FEBC2E}
+.dot.g{background:#28C840}
+.editor-title{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:8px}
+.editor-body{display:grid;grid-template-columns:1fr 1fr;min-height:340px}
+.code-pane{padding:24px;border-right:1px solid var(--border);overflow:hidden}
+.preview-pane{padding:24px;background:#070a14;position:relative;overflow:hidden}
+pre{font-family:var(--mono);font-size:12px;line-height:1.8;color:#8892b0}
+.t-kw{color:#c792ea}
+.t-fn{color:#82aaff}
+.t-str{color:#c3e88d}
+.t-tag{color:#f07178}
+.t-attr{color:#ffcb6b}
+.t-cmt{color:#546e7a}
+.t-num{color:var(--accent2)}
+.preview-label{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.preview-label::before{content:'';width:6px;height:6px;background:var(--accent2);border-radius:50%;animation:pulse 2s infinite}
+.preview-card{background:linear-gradient(135deg,#1a1f3a,#0f1428);border:1px solid var(--border);border-radius:10px;padding:20px;animation:previewIn 3s ease infinite}
+@keyframes previewIn{0%,90%,100%{opacity:1;transform:translateY(0)}50%{opacity:.95;transform:translateY(-2px)}}
+.preview-card h3{font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px}
+.preview-card p{font-size:12px;color:var(--muted);line-height:1.6}
+.preview-card .tag{display:inline-block;background:rgba(91,108,249,.2);color:var(--accent);font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:4px;margin-top:12px}
+.live-badge{position:absolute;top:12px;right:12px;background:rgba(62,237,176,.15);border:1px solid rgba(62,237,176,.3);color:var(--accent2);font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:100px;display:flex;align-items:center;gap:5px}
+
+/* FEATURES */
+.section{padding:100px 40px;max-width:1100px;margin:0 auto;position:relative;z-index:1}
+.section-tag{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px}
+.section-title{font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-2px;line-height:1.05;max-width:600px}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:60px}
+.feat{background:var(--panel);padding:36px 32px;transition:background .2s}
+.feat:hover{background:#131829}
+.feat-icon{font-size:28px;margin-bottom:20px}
+.feat-title{font-weight:700;font-size:17px;margin-bottom:10px;letter-spacing:-.4px}
+.feat-desc{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.7}
+.feat-pro{display:inline-block;background:rgba(247,201,72,.12);color:var(--accent3);font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:4px;margin-top:14px}
+
+/* PRICING */
+.pricing-wrap{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:60px;max-width:740px}
+.plan{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:40px;position:relative;overflow:hidden}
+.plan.pro{border-color:var(--accent);background:linear-gradient(145deg,#0f1428,#111836)}
+.plan.pro::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% -20%,rgba(91,108,249,.12),transparent 60%);pointer-events:none}
+.plan-name{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:16px;letter-spacing:2px;text-transform:uppercase}
+.plan-price{font-size:52px;font-weight:800;letter-spacing:-3px;line-height:1}
+.plan-price sup{font-size:20px;vertical-align:top;margin-top:10px;display:inline-block;font-weight:400;color:var(--muted)}
+.plan-period{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px}
+.plan-divider{border:none;border-top:1px solid var(--border);margin:28px 0}
+.plan-feat{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:10px;display:flex;gap:10px;align-items:flex-start}
+.plan-feat::before{content:'✓';color:var(--accent2);flex-shrink:0}
+.plan.free .plan-feat::before{color:var(--muted)}
+.plan-btn{display:block;text-align:center;margin-top:32px;padding:12px;border-radius:8px;font-family:var(--mono);font-size:13px;text-decoration:none;font-weight:700;transition:transform .2s,box-shadow .2s}
+.plan-btn.free-btn{border:1px solid var(--border);color:var(--text)}
+.plan-btn.pro-btn{background:var(--accent);color:#fff}
+.plan-btn.pro-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(91,108,249,.4)}
+.popular-tag{position:absolute;top:20px;right:20px;background:var(--accent);color:#fff;font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:100px}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;margin-top:60px;position:relative}
+.steps::before{content:'';position:absolute;top:28px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent)}
+.step{text-align:center}
+.step-num{width:56px;height:56px;border-radius:12px;background:var(--panel);border:1px solid var(--border);display:grid;place-items:center;margin:0 auto 20px;font-size:22px;font-weight:800;color:var(--accent);position:relative;z-index:1}
+.step-title{font-weight:700;font-size:15px;margin-bottom:8px}
+.step-desc{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6}
+
+/* LICENSE FLOW */
+.license-box{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:40px;margin-top:60px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.license-code{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:24px;font-family:var(--mono);font-size:12px}
+.lc-label{color:var(--muted);font-size:10px;margin-bottom:12px;letter-spacing:2px}
+.lc-key{color:var(--accent2);font-size:14px;letter-spacing:2px;word-break:break-all}
+.lc-status{margin-top:16px;display:flex;align-items:center;gap:8px;color:var(--accent2);font-size:11px}
+.lc-status-dot{width:8px;height:8px;background:var(--accent2);border-radius:50%;animation:pulse 2s infinite}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:40px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted)}
+footer span{color:var(--accent)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div id="cur"></div>
+<div id="cur2"></div>
+
+<nav>
+  <div class="logo">
+    <div class="logo-icon">∞</div>
+    Infinit Code
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#howto">How it works</a>
+    <a href="https://marketplace.visualstudio.com" class="nav-cta">Install Free →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="badge"><span class="badge-dot"></span>VS Code Extension · Now Available</div>
+  <h1>Code.<br/><em>See it</em> <span class="line2">instantly.</span></h1>
+  <p class="hero-sub">Live preview for <span>HTML, CSS & React</span> right inside VS Code — with AI chat, smart snippets, cloud sync, and custom themes.</p>
+  <div class="cta-row">
+    <a href="#pricing" class="btn-primary">↓ Install Extension <span style="opacity:.6">— Free</span></a>
+    <a href="#features" class="btn-ghost">See Pro Features</a>
+  </div>
+  <p class="hero-note">No config needed. Works in 30 seconds.</p>
+
+  <div class="editor-wrap">
+    <div class="editor-win">
+      <div class="editor-bar">
+        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+        <span class="editor-title">App.tsx — Infinit Code · LIVE</span>
+      </div>
+      <div class="editor-body">
+        <div class="code-pane">
+<pre><span class="t-kw">import</span> <span class="t-fn">React</span> <span class="t-kw">from</span> <span class="t-str">'react'</span>
+
+<span class="t-kw">export default function</span> <span class="t-fn">Card</span>() {
+  <span class="t-kw">return</span> (
+    <span class="t-tag">&lt;div</span> <span class="t-attr">className</span>=<span class="t-str">"card"</span><span class="t-tag">&gt;</span>
+      <span class="t-tag">&lt;h3&gt;</span>Hello, Infinit Code<span class="t-tag">&lt;/h3&gt;</span>
+      <span class="t-tag">&lt;p&gt;</span>Live preview, zero config<span class="t-tag">&lt;/p&gt;</span>
+      <span class="t-tag">&lt;span</span> <span class="t-attr">className</span>=<span class="t-str">"tag"</span><span class="t-tag">&gt;</span>PRO<span class="t-tag">&lt;/span&gt;</span>
+    <span class="t-tag">&lt;/div&gt;</span>
+  )
+}
+</pre>
+        </div>
+        <div class="preview-pane">
+          <div class="live-badge"><span>●</span> LIVE</div>
+          <div class="preview-label">Preview</div>
+          <div class="preview-card">
+            <h3>Hello, Infinit Code</h3>
+            <p>Live preview, zero config. Every keystroke updates the preview in real time — no reload needed.</p>
+            <div class="tag">PRO</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section reveal" id="features">
+  <div class="section-tag">// Features</div>
+  <h2 class="section-title">Everything you need to ship faster.</h2>
+  <div class="features-grid">
+    <div class="feat">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-title">Live Preview</div>
+      <p class="feat-desc">Instant side-by-side preview for HTML and React. Updates on every keystroke via WebSocket.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🤖</div>
+      <div class="feat-title">AI Chat</div>
+      <p class="feat-desc">Ask questions about your code, generate components, and get instant suggestions — right inside VS Code.</p>
+      <span class="feat-pro">PRO</span>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">📦</div>
+      <div class="feat-title">Smart Snippets</div>
+      <p class="feat-desc">Curated library of production-ready React, Tailwind, and vanilla CSS snippets — searchable by keyword.</p>
+      <span class="feat-pro">PRO</span>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">☁️</div>
+      <div class="feat-title">Cloud Sync</div>
+      <p class="feat-desc">Your snippets, themes, and settings follow you across every machine automatically.</p>
+      <span class="feat-pro">PRO</span>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🎨</div>
+      <div class="feat-title">Custom Themes</div>
+      <p class="feat-desc">Build your own preview themes with custom CSS — match your design system perfectly.</p>
+      <span class="feat-pro">PRO</span>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🔑</div>
+      <div class="feat-title">License Key</div>
+      <p class="feat-desc">Buy once, activate in seconds. Paste your key in the extension settings — that's it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section reveal" id="howto">
+  <div class="section-tag">// How it works</div>
+  <h2 class="section-title">Up and running in minutes.</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Install</div>
+      <p class="step-desc">Search "Infinit Code" in VS Code Extensions or click Install below.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Open a file</div>
+      <p class="step-desc">Open any .html or .tsx file. Press <code style="color:var(--accent);font-size:11px">Ctrl+Shift+P → Infinit: Preview</code></p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Go Pro</div>
+      <p class="step-desc">Buy a license below. Receive your key via email within seconds.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">Activate</div>
+      <p class="step-desc">Paste your key in VS Code Settings → Infinit Code → License Key. Done.</p>
+    </div>
+  </div>
+
+  <div class="license-box reveal">
+    <div>
+      <div class="section-tag">// License Activation</div>
+      <h3 style="font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1.2;margin-bottom:16px">One key.<br/>All features unlocked.</h3>
+      <p style="font-family:var(--mono);font-size:13px;color:var(--muted);line-height:1.7">After purchase, your license key is emailed instantly. Paste it once in VS Code settings — it validates against our API and unlocks all Pro features immediately.</p>
+    </div>
+    <div class="license-code">
+      <div class="lc-label">YOUR LICENSE KEY</div>
+      <div class="lc-key">INFT-XXXX-XXXX-XXXX-XXXX</div>
+      <div class="lc-status">
+        <div class="lc-status-dot"></div>
+        Pro · Active · 1 device
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section reveal" id="pricing">
+  <div class="section-tag">// Pricing</div>
+  <h2 class="section-title">Simple pricing.</h2>
+  <div class="pricing-wrap">
+    <div class="plan free">
+      <div class="plan-name">Free</div>
+      <div class="plan-price"><sup>R$</sup>0</div>
+      <div class="plan-period">forever</div>
+      <hr class="plan-divider"/>
+      <div class="plan-feat">Live Preview (HTML + React)</div>
+      <div class="plan-feat">Basic error overlay</div>
+      <div class="plan-feat" style="opacity:.3">AI Chat</div>
+      <div class="plan-feat" style="opacity:.3">Snippets library</div>
+      <div class="plan-feat" style="opacity:.3">Cloud Sync</div>
+      <div class="plan-feat" style="opacity:.3">Custom Themes</div>
+      <a href="#" class="plan-btn free-btn">Install Free →</a>
+    </div>
+    <div class="plan pro">
+      <div class="popular-tag">POPULAR</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price"><sup>R$</sup>49</div>
+      <div class="plan-period">/ month · cancel anytime</div>
+      <hr class="plan-divider"/>
+      <div class="plan-feat">Everything in Free</div>
+      <div class="plan-feat">AI Chat inside VS Code</div>
+      <div class="plan-feat">Smart Snippets library</div>
+      <div class="plan-feat">Cloud Sync (all machines)</div>
+      <div class="plan-feat">Custom preview themes</div>
+      <div class="plan-feat">Priority support</div>
+      <a href="/checkout" class="plan-btn pro-btn">Get Pro — R$49/mo →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Built with ∞ by <span>Infinit Code</span> · support@infinit-code.netlify.app
+</footer>
+
+<script>
+const cur=document.getElementById('cur'),cur2=document.getElementById('cur2');
+document.addEventListener('mousemove',e=>{
+  cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';
+  setTimeout(()=>{cur2.style.left=e.clientX+'px';cur2.style.top=e.clientY+'px'},80);
+});
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.transform='translate(-50%,-50%) scale(2.5)';cur.style.background='var(--accent2)';cur2.style.width='56px';cur2.style.height='56px'});
+  el.addEventListener('mouseleave',()=>{cur.style.transform='translate(-50%,-50%) scale(1)';cur.style.background='var(--accent)';cur2.style.width='36px';cur2.style.height='36px'});
+});
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

@@ -23,7 +23,7 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
   const activeFile = openFiles.find(f => f.id === activeFileId);
   const isContainerMode = machineConnected && !!machine;
 
-  // Modo local: gera preview do conteúdo em memória
+  // Local mode
   useEffect(() => {
     if (isContainerMode) return;
 
@@ -41,7 +41,7 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
     };
   }, [activeFile?.content, activeFile?.name, activeFile?.id, isContainerMode]);
 
-  // Container mode: check dev server + auto-start
+  // Container mode
   useEffect(() => {
     if (!isContainerMode) {
       setDevServerStatus('unknown');
@@ -49,12 +49,10 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
       return;
     }
 
-    // Check if dev server is running
     const checkServer = async () => {
       try {
         const res = await fetch(`/api/ide/preview?path=/&_check=1&_t=${Date.now()}`);
         const text = await res.text();
-        // A API retorna HTML com "Dev server não está rodando" quando falha
         if (text.includes('Dev server não está rodando') || text.includes('Nenhum container ativo')) {
           return false;
         }
@@ -72,13 +70,11 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
         return;
       }
 
-      // Auto-start dev server (only once)
       if (!startedRef.current && sendCommand) {
         startedRef.current = true;
         setDevServerStatus('starting');
         sendCommand('npm run dev 2>/dev/null || npx next dev 2>/dev/null || npx vite 2>/dev/null || echo "Nenhum dev server encontrado"');
 
-        // Poll until server is up (max 45s)
         let attempts = 0;
         pollingRef.current = setInterval(async () => {
           attempts++;
@@ -88,7 +84,6 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
             setRefreshKey(k => k + 1);
             if (pollingRef.current) clearInterval(pollingRef.current);
           } else if (attempts > 15) {
-            // 15 × 3s = 45s timeout
             setDevServerStatus('failed');
             if (pollingRef.current) clearInterval(pollingRef.current);
           }
@@ -113,7 +108,6 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
     if (sendCommand) {
       startedRef.current = false;
       setDevServerStatus('unknown');
-      // Force re-run of the init effect
       setRefreshKey(k => k + 1);
     }
   }, [sendCommand]);
@@ -123,51 +117,57 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
     return (
       <div style={{
         height: '100%',
-        background: '#0b0f1e',
+        background: '#06060f',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'column',
-        gap: 8,
-        fontFamily: 'monospace',
-        color: '#5A6080',
+        gap: 10,
+        fontFamily: "'Space Grotesk', sans-serif",
+        color: '#6e7191',
         fontSize: 13,
       }}>
-        <span style={{ fontSize: 32 }}>👁️</span>
+        <span style={{ fontSize: 28, opacity: 0.3 }}>▶</span>
         <span>Nenhum preview disponível</span>
       </div>
     );
   }
 
+  const statusDot = isContainerMode
+    ? devServerStatus === 'running' ? '#3EEDB0'
+      : devServerStatus === 'starting' ? '#f1c40f'
+      : '#e74c3c'
+    : '#3EEDB0';
+
   return (
     <div style={{
       height: '100%',
-      background: '#0b0f1e',
+      background: '#06060f',
       display: 'flex',
       flexDirection: 'column',
-      borderLeft: '1px solid #1c2340',
+      borderLeft: '1px solid rgba(124, 92, 252, 0.08)',
     }}>
-      {/* Header bar */}
+      {/* Header */}
       <div style={{
-        padding: '6px 14px',
-        background: '#0f1428',
-        borderBottom: '1px solid #1c2340',
-        fontFamily: 'monospace',
+        padding: '0 14px',
+        height: 30,
+        background: '#0c0c1d',
+        borderBottom: '1px solid rgba(124, 92, 252, 0.08)',
+        fontFamily: "'Space Grotesk', sans-serif",
         fontSize: 11,
-        color: '#5A6080',
+        color: '#6e7191',
         display: 'flex',
         alignItems: 'center',
         gap: 6,
+        flexShrink: 0,
       }}>
         <span style={{
           width: 6, height: 6, borderRadius: '50%',
-          background: isContainerMode
-            ? devServerStatus === 'running' ? '#3EEDB0'
-              : devServerStatus === 'starting' ? '#f1c40f'
-              : '#e74c3c'
-            : '#f1c40f',
+          background: statusDot,
+          boxShadow: devServerStatus === 'running' || !isContainerMode
+            ? `0 0 6px ${statusDot}66` : 'none',
         }} />
-        <span>
+        <span style={{ fontWeight: 500, letterSpacing: 0.5 }}>
           {isContainerMode
             ? `PREVIEW · ${devServerStatus === 'running' ? 'localhost:3000' : devServerStatus === 'starting' ? 'Iniciando...' : 'Parado'}`
             : `PREVIEW · ${activeFile?.name || ''}`
@@ -179,13 +179,14 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
             onClick={handleRefresh}
             style={{
               background: 'none',
-              border: '1px solid #1c2340',
-              borderRadius: 3,
-              color: '#5A6080',
+              border: '1px solid rgba(124, 92, 252, 0.12)',
+              borderRadius: 4,
+              color: '#6e7191',
               fontSize: 10,
               padding: '2px 8px',
               cursor: 'pointer',
-              fontFamily: 'monospace',
+              fontFamily: 'inherit',
+              transition: 'all 0.2s',
             }}
           >
             ↻ Refresh
@@ -203,19 +204,18 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 12,
-              fontFamily: 'monospace',
+              gap: 14,
+              fontFamily: "'Space Grotesk', sans-serif",
             }}>
               <div style={{
-                width: 20,
-                height: 20,
-                border: '2px solid #1c2340',
-                borderTopColor: '#00ff88',
+                width: 22, height: 22,
+                border: '2px solid rgba(124, 92, 252, 0.15)',
+                borderTopColor: '#7c5cfc',
                 borderRadius: '50%',
                 animation: 'spin 1s linear infinite',
               }} />
-              <span style={{ fontSize: 12, color: '#5A6080' }}>Iniciando dev server...</span>
-              <span style={{ fontSize: 10, color: '#3a4060' }}>npm run dev · Aguardando porta 3000</span>
+              <span style={{ fontSize: 12, color: '#6e7191' }}>Iniciando dev server...</span>
+              <span style={{ fontSize: 10, color: '#4a4f6e' }}>npm run dev · Aguardando porta 3000</span>
               <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
             </div>
           ) : devServerStatus === 'failed' ? (
@@ -226,23 +226,25 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
               alignItems: 'center',
               justifyContent: 'center',
               gap: 12,
-              fontFamily: 'monospace',
+              fontFamily: "'Space Grotesk', sans-serif",
             }}>
-              <span style={{ fontSize: 32 }}>🖥️</span>
-              <span style={{ fontSize: 12, color: '#5A6080' }}>Dev server não respondeu</span>
-              <span style={{ fontSize: 10, color: '#3a4060' }}>Verifique o terminal para erros</span>
+              <span style={{ fontSize: 28, opacity: 0.3 }}>⚠</span>
+              <span style={{ fontSize: 13, color: '#6e7191', fontWeight: 500 }}>Dev server não respondeu</span>
+              <span style={{ fontSize: 11, color: '#4a4f6e' }}>Verifique o terminal para erros</span>
               <button
                 onClick={handleRetryDevServer}
                 style={{
-                  background: '#1c2340',
-                  border: '1px solid #2a3050',
+                  background: 'rgba(124, 92, 252, 0.08)',
+                  border: '1px solid rgba(124, 92, 252, 0.15)',
                   borderRadius: 6,
-                  color: '#AEB6D8',
+                  color: '#a78bfa',
                   fontSize: 11,
-                  padding: '6px 16px',
+                  fontWeight: 500,
+                  padding: '8px 18px',
                   cursor: 'pointer',
-                  fontFamily: 'monospace',
+                  fontFamily: 'inherit',
                   marginTop: 4,
+                  transition: 'all 0.2s',
                 }}
               >
                 Tentar novamente

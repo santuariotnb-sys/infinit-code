@@ -35,7 +35,8 @@ export function IDELayout() {
   const [showGit, setShowGit] = useState(false);
   const [showRepoSelector, setShowRepoSelector] = useState(false);
   const [showClaudeGuide, setShowClaudeGuide] = useState(false);
-  const [terminalHeight] = useState(260);
+  const [terminalHeight] = useState(240);
+  const [terminalCollapsed, setTerminalCollapsed] = useState(true);
   const [machine, setMachine] = useState<MachineSession | null>(null);
   const [terminalConnected, setTerminalConnected] = useState(false);
   const [autoConnect, setAutoConnect] = useState(false);
@@ -52,7 +53,6 @@ export function IDELayout() {
       const next = [...prev, line];
       return next.length > 100 ? next.slice(-100) : next;
     });
-    // Notify subscribers
     outputSubscribersRef.current.forEach(cb => cb(line));
   }, []);
 
@@ -68,7 +68,7 @@ export function IDELayout() {
 
   const explorerWidth = showExplorer ? 220 : 0;
 
-  // Auto-sync após clone: tenta sync com retry até encontrar arquivos
+  // Auto-sync após clone
   const schedulePostCloneSync = useCallback(() => {
     let attempts = 0;
     const maxAttempts = 6;
@@ -88,7 +88,6 @@ export function IDELayout() {
     setTimeout(trySync, 8000);
   }, [storeSyncFromContainer]);
 
-  // Quando terminal conectar, executa comandos pendentes
   useEffect(() => {
     if (terminalConnected && pendingCommandsRef.current) {
       const { command, env } = pendingCommandsRef.current;
@@ -140,12 +139,14 @@ export function IDELayout() {
     pendingCommandsRef.current = { command, env };
     setAutoConnect(true);
     setShowTerminal(true);
+    setTerminalCollapsed(false);
     if (isMobile) setMobileTab('terminal');
   }, [terminalConnected, isMobile]);
 
   const handleStartTerminal = useCallback(() => {
     setAutoConnect(true);
     setShowTerminal(true);
+    setTerminalCollapsed(false);
     if (isMobile) setMobileTab('terminal');
   }, [isMobile]);
 
@@ -167,17 +168,27 @@ export function IDELayout() {
     }
   }, [terminalConnected, storeSyncFromContainer]);
 
-  // Terminal send for IntelliChat
   const terminalSendCommand = useCallback((cmd: string) => {
     if (terminalCommandRef.current) {
       terminalCommandRef.current(cmd);
     } else {
-      // Auto-start terminal if not running
       setAutoConnect(true);
       setShowTerminal(true);
+      setTerminalCollapsed(false);
       pendingCommandsRef.current = { command: cmd };
     }
   }, []);
+
+  const handleToggleTerminal = useCallback(() => {
+    if (!showTerminal) {
+      setShowTerminal(true);
+      setTerminalCollapsed(false);
+    } else if (terminalCollapsed) {
+      setTerminalCollapsed(false);
+    } else {
+      setTerminalCollapsed(true);
+    }
+  }, [showTerminal, terminalCollapsed]);
 
   // Mobile layout
   if (isMobile) {
@@ -186,33 +197,39 @@ export function IDELayout() {
         display: 'flex',
         flexDirection: 'column',
         height: '100dvh',
-        background: '#0a0a0a',
+        background: '#06060f',
         overflow: 'hidden',
       }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           padding: '0 12px',
-          height: 40,
-          background: '#0f1428',
-          borderBottom: '1px solid #1c2340',
-          fontFamily: 'monospace',
+          height: 44,
+          background: '#0c0c1d',
+          borderBottom: '1px solid rgba(124, 92, 252, 0.12)',
+          fontFamily: "'Space Grotesk', sans-serif",
           gap: 8,
           flexShrink: 0,
         }}>
-          <span style={{ color: '#00ff88', fontSize: 16, fontWeight: 700 }}>∞</span>
-          <span style={{ color: '#e8e8e8', fontSize: 12, fontWeight: 700, flex: 1 }}>Infinit Code</span>
+          <div style={{
+            width: 24, height: 24,
+            borderRadius: 5,
+            background: '#7c5cfc',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 13, fontWeight: 800, color: '#fff',
+          }}>∞</div>
+          <span style={{ color: '#e2e4f0', fontSize: 12, fontWeight: 700, flex: 1 }}>Infinit Code</span>
           <button
             onClick={() => setShowRepoSelector(true)}
             style={{
-              background: '#1c2340',
-              border: 'none',
-              borderRadius: 4,
-              color: '#AEB6D8',
+              background: 'rgba(124, 92, 252, 0.08)',
+              border: '1px solid rgba(124, 92, 252, 0.12)',
+              borderRadius: 6,
+              color: '#a78bfa',
               fontSize: 10,
-              padding: '4px 8px',
+              padding: '4px 10px',
               cursor: 'pointer',
-              fontFamily: 'monospace',
+              fontFamily: 'inherit',
             }}
           >Clone</button>
         </div>
@@ -248,8 +265,8 @@ export function IDELayout() {
 
         <div style={{
           display: 'flex',
-          background: '#0f1428',
-          borderTop: '1px solid #1c2340',
+          background: '#0c0c1d',
+          borderTop: '1px solid rgba(124, 92, 252, 0.12)',
           flexShrink: 0,
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}>
@@ -257,7 +274,7 @@ export function IDELayout() {
             { id: 'chat' as MobileTab, label: '∞', title: 'Chat' },
             { id: 'editor' as MobileTab, label: '{ }', title: 'Editor' },
             { id: 'preview' as MobileTab, label: '▶', title: 'Preview' },
-            { id: 'explorer' as MobileTab, label: '📁', title: 'Arquivos' },
+            { id: 'explorer' as MobileTab, label: '☰', title: 'Arquivos' },
             { id: 'terminal' as MobileTab, label: '>_', title: 'Terminal' },
           ]).map(tab => (
             <button
@@ -273,10 +290,10 @@ export function IDELayout() {
                 background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
-                color: mobileTab === tab.id ? '#00ff88' : '#5A6080',
-                fontFamily: 'monospace',
+                color: mobileTab === tab.id ? '#a78bfa' : '#4a4f6e',
+                fontFamily: "'Space Grotesk', sans-serif",
                 fontSize: 14,
-                borderTop: mobileTab === tab.id ? '2px solid #00ff88' : '2px solid transparent',
+                borderTop: mobileTab === tab.id ? '2px solid #7c5cfc' : '2px solid transparent',
               }}
             >
               <span>{tab.label}</span>
@@ -299,6 +316,7 @@ export function IDELayout() {
             onClose={() => setShowClaudeGuide(false)}
             onRunCommand={(cmd) => {
               setShowTerminal(true);
+              setTerminalCollapsed(false);
               setAutoConnect(true);
               setMobileTab('terminal');
               pendingCommandsRef.current = { command: cmd };
@@ -315,12 +333,12 @@ export function IDELayout() {
       display: 'flex',
       flexDirection: 'column',
       height: '100vh',
-      background: '#0a0a0a',
+      background: '#06060f',
       overflow: 'hidden',
     }}>
       <Toolbar
-        onToggleTerminal={() => setShowTerminal(!showTerminal)}
-        showTerminal={showTerminal}
+        onToggleTerminal={handleToggleTerminal}
+        showTerminal={showTerminal && !terminalCollapsed}
         onToggleChat={() => setShowChat(!showChat)}
         showChat={showChat}
         onToggleGit={() => setShowGit(!showGit)}
@@ -337,7 +355,14 @@ export function IDELayout() {
         overflow: 'hidden',
       }}>
         {showExplorer && (
-          <div style={{ width: explorerWidth, flexShrink: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{
+            width: explorerWidth,
+            flexShrink: 0,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            borderRight: '1px solid rgba(124, 92, 252, 0.08)',
+          }}>
             <FileExplorer />
             {showGit && <GitPanel onRunCommand={handleRunCommand} />}
           </div>
@@ -354,21 +379,74 @@ export function IDELayout() {
               </div>
             )}
           </div>
+
+          {/* Terminal: collapsible bar + panel */}
           {showTerminal && (
-            <div style={{ height: terminalHeight, flexShrink: 0, overflow: 'hidden' }}>
-              <TerminalPanel
-                onMachineChange={setMachine}
-                onCommandRef={ref => { terminalCommandRef.current = ref; }}
-                onStatusChange={handleTerminalStatusChange}
-                onOutputLine={handleOutputLine}
-                autoConnect={autoConnect}
-              />
-            </div>
+            <>
+              {/* Terminal header bar (always visible when terminal is active) */}
+              <div
+                onClick={() => setTerminalCollapsed(!terminalCollapsed)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0 14px',
+                  height: 30,
+                  background: '#0c0c1d',
+                  borderTop: '1px solid rgba(124, 92, 252, 0.08)',
+                  cursor: 'pointer',
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontSize: 11,
+                  color: '#6e7191',
+                  gap: 8,
+                  flexShrink: 0,
+                  userSelect: 'none',
+                }}
+              >
+                <span style={{
+                  fontSize: 8,
+                  transform: terminalCollapsed ? 'rotate(-90deg)' : 'rotate(0)',
+                  transition: 'transform 0.15s',
+                  display: 'inline-block',
+                }}>▼</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{
+                    width: 6, height: 6,
+                    borderRadius: '50%',
+                    background: terminalConnected ? '#3EEDB0' : '#6e7191',
+                    boxShadow: terminalConnected ? '0 0 6px rgba(62, 237, 176, 0.4)' : 'none',
+                  }} />
+                  TERMINAL
+                  {terminalConnected && <span style={{ color: '#4a4f6e', fontSize: 10 }}>· gru</span>}
+                </span>
+                <div style={{ flex: 1 }} />
+                {terminalConnected && (
+                  <span style={{ fontSize: 10, color: '#4a4f6e' }}>Conectado</span>
+                )}
+              </div>
+              {/* Terminal content */}
+              {!terminalCollapsed && (
+                <div style={{ height: terminalHeight, flexShrink: 0, overflow: 'hidden' }}>
+                  <TerminalPanel
+                    onMachineChange={setMachine}
+                    onCommandRef={ref => { terminalCommandRef.current = ref; }}
+                    onStatusChange={handleTerminalStatusChange}
+                    onOutputLine={handleOutputLine}
+                    autoConnect={autoConnect}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
 
+        {/* Chat panel - wider */}
         {showChat && (
-          <div style={{ width: 360, flexShrink: 0, overflow: 'hidden', borderLeft: '1px solid #1c2340' }}>
+          <div style={{
+            width: 400,
+            flexShrink: 0,
+            overflow: 'hidden',
+            borderLeft: '1px solid rgba(124, 92, 252, 0.08)',
+          }}>
             <IntelliChat
               terminalSendCommand={terminalSendCommand}
               terminalOutput={terminalLines.join('\n')}
@@ -400,6 +478,7 @@ export function IDELayout() {
           onClose={() => setShowClaudeGuide(false)}
           onRunCommand={(cmd) => {
             setShowTerminal(true);
+            setTerminalCollapsed(false);
             setAutoConnect(true);
             pendingCommandsRef.current = { command: cmd };
           }}

@@ -78,7 +78,7 @@ const STEPS: Record<TabOS, { num: string; green?: boolean; title: string; desc: 
   mac: [
     { num: '01', green: true, title: 'Baixar o .dmg', desc: 'Clique em "Baixar para Mac" acima. Escolha arm64 para Apple Silicon (M1/M2/M3) ou x64 para Intel.' },
     { num: '02', title: 'Abrir e instalar', desc: 'Abre o arquivo .dmg. Arrasta o Infinit Code para a pasta Applications. Ejecta o disco.' },
-    { num: '03', title: 'Primeira abertura', desc: 'Se aparecer "desenvolvedor não identificado", clique com botão direito → Abrir → Abrir. Ou remova a quarentena via terminal:', code: 'sudo xattr -rd com.apple.quarantine "/Applications/Infinit Code.app"' },
+    { num: '03', title: 'Primeira abertura — aviso do macOS', desc: 'Se aparecer "está danificado" ou "desenvolvedor não identificado": isso é normal em apps sem assinatura Apple. Abra o Terminal e rode o comando abaixo. Depois abra o app normalmente.', code: 'sudo xattr -rd com.apple.quarantine "/Applications/Infinit Code.app"' },
     { num: '04', title: 'Setup automático', desc: 'O app detecta e instala automaticamente: Node.js LTS, Git, Claude Code CLI e as Skills necessárias. Só aguardar a barra de progresso.' },
     { num: '05', green: true, title: 'Ativar a licença', desc: 'Cole a chave INFT-XXXX que chegou por email. Clique em "Ativar e entrar". Pronto — IDE abre em seguida.' },
   ],

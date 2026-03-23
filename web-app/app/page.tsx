@@ -16,75 +16,118 @@ export default function LandingPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#050510', color: '#e8e8e8' }}>
+    <div style={{ minHeight: '100vh', background: '#06060f', color: '#e2e4f0' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
         :root {
-          --primary: #00ff88;
-          --accent: #5B6CF9;
-          --bg: #050510;
-          --surface: #0a0f1e;
-          --border: rgba(91, 108, 249, 0.15);
-          --glow-primary: rgba(0, 255, 136, 0.4);
-          --glow-accent: rgba(91, 108, 249, 0.4);
-          --text-primary: #e8e8e8;
-          --text-muted: #6b7194;
-          --font-display: 'JetBrains Mono', monospace;
+          --primary: #7c5cfc;
+          --primary-light: #a78bfa;
+          --accent: #3EEDB0;
+          --bg: #06060f;
+          --surface: #0c0c1d;
+          --surface-2: #111128;
+          --border: rgba(124, 92, 252, 0.12);
+          --border-hover: rgba(124, 92, 252, 0.3);
+          --glow: rgba(124, 92, 252, 0.4);
+          --glow-accent: rgba(62, 237, 176, 0.4);
+          --text: #e2e4f0;
+          --text-muted: #6e7191;
+          --font-display: 'Syne', sans-serif;
           --font-body: 'Space Grotesk', sans-serif;
+          --font-mono: 'JetBrains Mono', monospace;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .grid-bg {
-          position: fixed;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background-image:
-            linear-gradient(rgba(91, 108, 249, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(91, 108, 249, 0.03) 1px, transparent 1px);
-          background-size: 60px 60px;
+        /* ===== INFINITY SYMBOL ANIMATION ===== */
+        .infinity-bg {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 80px;
+          font-family: var(--font-display);
+          font-weight: 800;
+          color: rgba(124, 92, 252, 0.06);
           pointer-events: none;
           z-index: 0;
+          animation: infinityPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes infinityPulse {
+          0% {
+            font-size: 80px;
+            opacity: 0;
+            color: rgba(124, 92, 252, 0.03);
+            letter-spacing: 0px;
+          }
+          20% {
+            opacity: 1;
+            color: rgba(124, 92, 252, 0.08);
+          }
+          50% {
+            font-size: 420px;
+            opacity: 0.15;
+            color: rgba(124, 92, 252, 0.12);
+            letter-spacing: 20px;
+          }
+          80% {
+            font-size: 700px;
+            opacity: 0.04;
+            color: rgba(124, 92, 252, 0.04);
+            letter-spacing: 40px;
+          }
+          100% {
+            font-size: 900px;
+            opacity: 0;
+            color: rgba(124, 92, 252, 0);
+            letter-spacing: 60px;
+          }
+        }
+
+        /* ===== GRID BG ===== */
+        .grid-bg {
+          position: fixed;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(124, 92, 252, 0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(124, 92, 252, 0.025) 1px, transparent 1px);
+          background-size: 80px 80px;
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .glow-orb {
+          position: fixed;
+          border-radius: 50%;
+          pointer-events: none;
+          z-index: 0;
+          filter: blur(80px);
         }
 
         .glow-orb-1 {
-          position: fixed;
-          width: 600px; height: 600px;
-          top: -200px; right: -100px;
-          background: radial-gradient(circle, rgba(0, 255, 136, 0.08) 0%, transparent 70%);
-          pointer-events: none;
-          z-index: 0;
-          animation: orbFloat 8s ease-in-out infinite;
+          width: 500px; height: 500px;
+          top: -150px; right: -100px;
+          background: rgba(124, 92, 252, 0.12);
+          animation: orbDrift 12s ease-in-out infinite;
         }
 
         .glow-orb-2 {
-          position: fixed;
-          width: 500px; height: 500px;
-          bottom: -100px; left: -100px;
-          background: radial-gradient(circle, rgba(91, 108, 249, 0.1) 0%, transparent 70%);
-          pointer-events: none;
-          z-index: 0;
-          animation: orbFloat 10s ease-in-out infinite reverse;
+          width: 400px; height: 400px;
+          bottom: 20%; left: -80px;
+          background: rgba(62, 237, 176, 0.08);
+          animation: orbDrift 15s ease-in-out infinite reverse;
         }
 
-        @keyframes orbFloat {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(30px, 20px) scale(1.1); }
+        @keyframes orbDrift {
+          0%, 100% { transform: translate(0, 0); }
+          50% { transform: translate(40px, 30px); }
         }
 
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(30px); }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(24px); }
           to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulseGlow {
-          0%, 100% { box-shadow: 0 0 20px var(--glow-primary), 0 0 60px rgba(0, 255, 136, 0.1); }
-          50% { box-shadow: 0 0 30px var(--glow-primary), 0 0 80px rgba(0, 255, 136, 0.2); }
-        }
-
-        @keyframes typing {
-          from { width: 0; }
-          to { width: 100%; }
         }
 
         @keyframes blink {
@@ -92,141 +135,132 @@ export default function LandingPage() {
           50% { opacity: 0; }
         }
 
-        @keyframes scanline {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(100vh); }
-        }
-
-        .nav-glass {
+        /* ===== NAV ===== */
+        .nav {
           position: sticky;
           top: 0;
           z-index: 100;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 14px clamp(16px, 4vw, 40px);
-          background: rgba(5, 5, 16, 0.8);
-          backdrop-filter: blur(20px);
+          padding: 16px clamp(20px, 5vw, 48px);
+          background: rgba(6, 6, 15, 0.85);
+          backdrop-filter: blur(24px);
           border-bottom: 1px solid var(--border);
         }
 
-        .nav-logo {
+        .nav-brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
           font-family: var(--font-display);
-          font-size: 15px;
           font-weight: 800;
-          color: var(--primary);
-          letter-spacing: 3px;
-          text-transform: uppercase;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .nav-logo-symbol {
-          font-size: 22px;
-          text-shadow: 0 0 20px var(--glow-primary);
-        }
-
-        .nav-links {
-          display: flex;
-          align-items: center;
-          gap: 28px;
-        }
-
-        .nav-link {
-          color: var(--text-muted);
-          font-family: var(--font-body);
-          font-size: 13px;
-          font-weight: 500;
-          text-decoration: none;
-          transition: color 0.2s;
+          font-size: 16px;
+          color: var(--text);
           letter-spacing: 0.5px;
         }
 
-        .nav-link:hover { color: var(--primary); }
-
-        .btn-primary {
+        .nav-brand-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 28px;
+          height: 28px;
           background: var(--primary);
-          color: #000;
-          border: none;
-          border-radius: 8px;
-          padding: 10px 24px;
-          font-size: 13px;
-          font-weight: 700;
-          cursor: pointer;
-          font-family: var(--font-display);
-          letter-spacing: 1px;
-          transition: all 0.3s;
-          box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+          border-radius: 6px;
+          font-size: 16px;
+          color: #fff;
         }
 
-        .btn-primary:hover {
-          box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+        .nav-menu {
+          display: flex;
+          align-items: center;
+          gap: 32px;
+        }
+
+        .nav-link {
+          font-family: var(--font-body);
+          font-size: 13px;
+          font-weight: 500;
+          color: var(--text-muted);
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+
+        .nav-link:hover { color: var(--text); }
+
+        .btn-nav {
+          font-family: var(--font-body);
+          font-size: 13px;
+          font-weight: 600;
+          color: #fff;
+          background: var(--primary);
+          border: none;
+          border-radius: 8px;
+          padding: 10px 22px;
+          cursor: pointer;
+          transition: all 0.25s;
+          box-shadow: 0 0 20px rgba(124, 92, 252, 0.25);
+        }
+
+        .btn-nav:hover {
+          box-shadow: 0 0 30px rgba(124, 92, 252, 0.4);
           transform: translateY(-1px);
         }
 
-        .btn-outline {
-          background: transparent;
-          color: var(--text-muted);
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 14px 32px;
-          font-size: 14px;
-          font-weight: 500;
-          cursor: pointer;
-          font-family: var(--font-body);
-          text-decoration: none;
-          display: flex;
-          align-items: center;
-          transition: all 0.3s;
-        }
-
-        .btn-outline:hover {
-          border-color: var(--accent);
-          color: var(--text-primary);
-          box-shadow: 0 0 20px var(--glow-accent);
-        }
-
+        /* ===== HERO ===== */
         .hero {
           position: relative;
           display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
-          padding: clamp(60px, 12vw, 120px) 20px clamp(40px, 8vw, 80px);
-          max-width: 860px;
+          padding: clamp(80px, 14vw, 140px) 24px clamp(60px, 10vw, 100px);
+          max-width: 900px;
           margin: 0 auto;
           z-index: 1;
+          overflow: hidden;
         }
 
         .hero-badge {
-          font-family: var(--font-display);
+          font-family: var(--font-mono);
           font-size: 11px;
           font-weight: 500;
-          color: var(--primary);
-          letter-spacing: 4px;
+          color: var(--accent);
+          letter-spacing: 3px;
           text-transform: uppercase;
-          margin-bottom: 28px;
-          background: rgba(0, 255, 136, 0.05);
-          border: 1px solid rgba(0, 255, 136, 0.12);
+          margin-bottom: 32px;
+          background: rgba(62, 237, 176, 0.06);
+          border: 1px solid rgba(62, 237, 176, 0.15);
           border-radius: 30px;
           padding: 8px 20px;
-          backdrop-filter: blur(10px);
-          animation: fadeInUp 0.6s ease-out;
+          animation: fadeUp 0.5s ease-out;
         }
 
-        .hero-title {
+        .hero-badge-dot {
+          display: inline-block;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--accent);
+          margin-right: 10px;
+          box-shadow: 0 0 8px var(--glow-accent);
+        }
+
+        .hero-h1 {
           font-family: var(--font-display);
-          font-size: clamp(32px, 7vw, 56px);
+          font-size: clamp(40px, 8vw, 72px);
           font-weight: 800;
-          margin: 0 0 24px;
-          line-height: 1.05;
+          line-height: 1.0;
           letter-spacing: -2px;
-          animation: fadeInUp 0.6s ease-out 0.1s both;
+          margin-bottom: 28px;
+          position: relative;
+          z-index: 2;
+          animation: fadeUp 0.5s ease-out 0.1s both;
         }
 
-        .hero-title-gradient {
-          background: linear-gradient(135deg, var(--primary) 0%, #3EEDB0 50%, var(--accent) 100%);
+        .hero-h1-gradient {
+          background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 40%, var(--accent) 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -234,129 +268,156 @@ export default function LandingPage() {
 
         .hero-sub {
           font-family: var(--font-body);
-          font-size: 17px;
+          font-size: clamp(15px, 2.5vw, 18px);
+          font-weight: 400;
           color: var(--text-muted);
           line-height: 1.7;
-          margin: 0 0 44px;
-          max-width: 520px;
-          animation: fadeInUp 0.6s ease-out 0.2s both;
+          max-width: 500px;
+          margin-bottom: 44px;
+          animation: fadeUp 0.5s ease-out 0.2s both;
+        }
+
+        .hero-sub strong {
+          color: var(--text);
+          font-weight: 600;
         }
 
         .hero-actions {
           display: flex;
           gap: 14px;
-          animation: fadeInUp 0.6s ease-out 0.3s both;
+          flex-wrap: wrap;
+          justify-content: center;
+          animation: fadeUp 0.5s ease-out 0.3s both;
         }
 
         .btn-hero {
-          background: linear-gradient(135deg, var(--primary), #3EEDB0);
-          color: #000;
+          font-family: var(--font-body);
+          font-size: 15px;
+          font-weight: 600;
+          color: #fff;
+          background: var(--primary);
           border: none;
           border-radius: 10px;
           padding: 16px 36px;
-          font-size: 15px;
-          font-weight: 700;
           cursor: pointer;
-          font-family: var(--font-display);
-          letter-spacing: 0.5px;
           transition: all 0.3s;
-          animation: pulseGlow 3s ease-in-out infinite;
+          box-shadow: 0 4px 24px rgba(124, 92, 252, 0.3);
         }
 
         .btn-hero:hover {
           transform: translateY(-2px);
-          box-shadow: 0 0 40px var(--glow-primary), 0 0 80px rgba(0, 255, 136, 0.15);
+          box-shadow: 0 8px 32px rgba(124, 92, 252, 0.45);
         }
 
-        /* IDE Mockup */
-        .ide-section {
-          max-width: 960px;
-          margin: 0 auto 120px;
+        .btn-ghost {
+          font-family: var(--font-body);
+          font-size: 15px;
+          font-weight: 500;
+          color: var(--text-muted);
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          padding: 16px 32px;
+          cursor: pointer;
+          text-decoration: none;
+          transition: all 0.3s;
+          display: inline-flex;
+          align-items: center;
+        }
+
+        .btn-ghost:hover {
+          border-color: var(--border-hover);
+          color: var(--text);
+        }
+
+        .hero-note {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          color: var(--text-muted);
+          margin-top: 20px;
+          opacity: 0.6;
+          animation: fadeUp 0.5s ease-out 0.4s both;
+        }
+
+        /* ===== IDE MOCKUP ===== */
+        .ide-wrap {
+          max-width: 920px;
+          margin: 0 auto 140px;
           padding: 0 24px;
           position: relative;
           z-index: 1;
-          animation: fadeInUp 0.8s ease-out 0.4s both;
+          animation: fadeUp 0.7s ease-out 0.5s both;
         }
 
-        .ide-mockup {
+        .ide-frame {
           background: var(--surface);
           border: 1px solid var(--border);
           border-radius: 16px;
           overflow: hidden;
           box-shadow:
-            0 0 40px rgba(91, 108, 249, 0.08),
-            0 20px 60px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            0 0 0 1px rgba(124, 92, 252, 0.05),
+            0 24px 64px rgba(0, 0, 0, 0.5),
+            0 0 60px rgba(124, 92, 252, 0.06);
         }
 
-        .ide-titlebar {
+        .ide-bar {
           display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 12px 18px;
-          background: rgba(10, 15, 30, 0.8);
+          gap: 7px;
+          padding: 12px 16px;
+          background: var(--surface-2);
           border-bottom: 1px solid var(--border);
         }
 
-        .ide-dot {
-          width: 11px; height: 11px;
-          border-radius: 50%;
-        }
+        .ide-bar-dot { width: 10px; height: 10px; border-radius: 50%; }
 
-        .ide-titlebar-text {
+        .ide-bar-title {
           flex: 1;
           text-align: center;
-          font-family: var(--font-display);
+          font-family: var(--font-mono);
           font-size: 11px;
           color: var(--text-muted);
-          letter-spacing: 2px;
+          letter-spacing: 1px;
         }
 
-        .ide-body {
-          display: flex;
-          height: clamp(220px, 42vw, 340px);
-        }
+        .ide-content { display: flex; height: clamp(200px, 38vw, 320px); }
 
-        .ide-explorer {
-          width: 190px;
+        .ide-sidebar {
+          width: 180px;
           border-right: 1px solid var(--border);
-          padding: 14px 0;
-          font-family: var(--font-display);
+          padding: 12px 0;
+          font-family: var(--font-mono);
           font-size: 11px;
           color: var(--text-muted);
         }
 
-        .ide-explorer-item {
-          padding: 4px 16px;
-          transition: all 0.15s;
-        }
-
-        .ide-explorer-item-active {
-          color: var(--primary);
-          background: rgba(0, 255, 136, 0.05);
+        .ide-file { padding: 4px 16px; transition: all 0.15s; }
+        .ide-file-active {
+          color: var(--primary-light);
+          background: rgba(124, 92, 252, 0.06);
           border-left: 2px solid var(--primary);
         }
 
         .ide-editor {
           flex: 1;
           padding: 16px 20px;
-          font-family: var(--font-display);
-          font-size: 12.5px;
-          line-height: 1.9;
+          font-family: var(--font-mono);
+          font-size: 12px;
+          line-height: 2;
           overflow: hidden;
         }
 
-        .ide-preview {
-          width: 260px;
+        .ide-preview-pane {
+          width: 240px;
           border-left: 1px solid var(--border);
           display: flex;
           flex-direction: column;
         }
 
-        .ide-preview-header {
+        .ide-preview-bar {
           padding: 8px 14px;
           border-bottom: 1px solid var(--border);
-          font-family: var(--font-display);
+          font-family: var(--font-mono);
           font-size: 10px;
           color: var(--text-muted);
           letter-spacing: 2px;
@@ -365,311 +426,398 @@ export default function LandingPage() {
           gap: 6px;
         }
 
+        .ide-preview-live {
+          display: inline-block;
+          width: 6px; height: 6px;
+          border-radius: 50%;
+          background: var(--accent);
+          box-shadow: 0 0 6px var(--glow-accent);
+        }
+
         .ide-preview-body {
           flex: 1;
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(5, 5, 16, 0.6);
+          background: rgba(6, 6, 15, 0.5);
         }
 
-        .ide-terminal {
+        .ide-terminal-bar {
           border-top: 1px solid var(--border);
-          padding: 10px 18px;
-          font-family: var(--font-display);
+          padding: 10px 16px;
+          font-family: var(--font-mono);
           font-size: 12px;
           color: var(--text-muted);
-          background: rgba(5, 5, 16, 0.6);
+          background: rgba(6, 6, 15, 0.5);
           display: flex;
           align-items: center;
           gap: 8px;
         }
 
-        .terminal-cursor {
+        .cursor-blink {
           display: inline-block;
-          width: 8px;
-          height: 16px;
+          width: 8px; height: 15px;
           background: var(--primary);
           animation: blink 1s step-end infinite;
         }
 
-        /* Features */
-        .features-section {
-          max-width: 960px;
-          margin: 0 auto;
-          padding: 0 24px 120px;
-          position: relative;
-          z-index: 1;
+        /* ===== SECTIONS ===== */
+        .section-label {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          color: var(--text-muted);
+          letter-spacing: 3px;
+          text-transform: uppercase;
+          margin-bottom: 16px;
         }
 
-        .section-label {
-          font-family: var(--font-display);
-          font-size: 11px;
-          color: var(--accent);
-          letter-spacing: 4px;
-          text-transform: uppercase;
-          margin-bottom: 14px;
-        }
+        .section-label span { color: var(--primary-light); }
 
         .section-title {
           font-family: var(--font-display);
-          font-size: clamp(24px, 5vw, 36px);
+          font-size: clamp(28px, 6vw, 48px);
           font-weight: 800;
-          margin: 0;
+          line-height: 1.1;
           letter-spacing: -1px;
+        }
+
+        /* ===== FEATURES ===== */
+        .features-wrap {
+          max-width: 960px;
+          margin: 0 auto;
+          padding: 0 24px 140px;
+          position: relative;
+          z-index: 1;
         }
 
         .features-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
+          gap: 14px;
         }
 
-        .feature-card {
-          background: rgba(10, 15, 30, 0.6);
+        .feat-card {
+          background: var(--surface);
           border: 1px solid var(--border);
           border-radius: 14px;
           padding: 28px 24px;
-          backdrop-filter: blur(10px);
           transition: all 0.3s;
           position: relative;
-          overflow: hidden;
         }
 
-        .feature-card::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0; right: 0;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, var(--accent), transparent);
-          opacity: 0;
-          transition: opacity 0.3s;
+        .feat-card:hover {
+          border-color: var(--border-hover);
+          transform: translateY(-3px);
+          box-shadow: 0 12px 40px rgba(124, 92, 252, 0.08);
         }
 
-        .feature-card:hover::before { opacity: 1; }
-
-        .feature-card:hover {
-          border-color: rgba(91, 108, 249, 0.3);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 30px rgba(91, 108, 249, 0.08);
+        .feat-emoji {
+          font-size: 24px;
+          margin-bottom: 18px;
+          display: block;
         }
 
-        .feature-icon {
-          font-family: var(--font-display);
-          font-size: 22px;
-          font-weight: 800;
-          margin-bottom: 16px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 44px;
-          height: 44px;
-          border-radius: 10px;
-          background: rgba(91, 108, 249, 0.08);
-          border: 1px solid rgba(91, 108, 249, 0.12);
-        }
-
-        .feature-title {
-          font-family: var(--font-display);
-          font-size: 14px;
-          font-weight: 700;
-          color: var(--text-primary);
-          margin-bottom: 8px;
-          letter-spacing: 0.5px;
-        }
-
-        .feature-desc {
-          font-family: var(--font-body);
-          font-size: 13px;
-          color: var(--text-muted);
-          line-height: 1.6;
-        }
-
-        /* How it works */
-        .steps-section {
-          max-width: 740px;
-          margin: 0 auto;
-          padding: 0 24px 120px;
-          position: relative;
-          z-index: 1;
-        }
-
-        .step-card {
-          display: flex;
-          gap: 24px;
-          align-items: flex-start;
-          background: rgba(10, 15, 30, 0.6);
-          border: 1px solid var(--border);
-          border-radius: 14px;
-          padding: 24px 28px;
-          backdrop-filter: blur(10px);
-          transition: all 0.3s;
-        }
-
-        .step-card:hover {
-          border-color: rgba(0, 255, 136, 0.2);
-          box-shadow: 0 0 30px rgba(0, 255, 136, 0.05);
-        }
-
-        .step-number {
-          font-family: var(--font-display);
-          font-size: 32px;
-          font-weight: 800;
-          background: linear-gradient(180deg, var(--primary), rgba(0, 255, 136, 0.1));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          line-height: 1;
-          flex-shrink: 0;
-        }
-
-        .step-title {
+        .feat-name {
           font-family: var(--font-display);
           font-size: 15px;
           font-weight: 700;
-          color: var(--text-primary);
-          margin-bottom: 6px;
+          color: var(--text);
+          margin-bottom: 8px;
         }
 
-        .step-desc {
+        .feat-desc {
           font-family: var(--font-body);
           font-size: 13px;
           color: var(--text-muted);
           line-height: 1.6;
         }
 
-        /* Pricing */
-        .pricing-section {
-          max-width: 480px;
+        .feat-tag {
+          display: inline-block;
+          margin-top: 14px;
+          font-family: var(--font-mono);
+          font-size: 9px;
+          font-weight: 700;
+          color: var(--primary-light);
+          background: rgba(124, 92, 252, 0.1);
+          border: 1px solid rgba(124, 92, 252, 0.15);
+          border-radius: 4px;
+          padding: 3px 8px;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+        }
+
+        /* ===== STEPS ===== */
+        .steps-wrap {
+          max-width: 800px;
           margin: 0 auto;
-          padding: 0 24px 120px;
+          padding: 0 24px 140px;
           position: relative;
           z-index: 1;
         }
 
-        .pricing-card {
-          background: rgba(10, 15, 30, 0.8);
-          border: 1px solid rgba(0, 255, 136, 0.15);
-          border-radius: 16px;
-          padding: 40px 36px;
-          text-align: center;
-          position: relative;
-          overflow: hidden;
-          backdrop-filter: blur(20px);
-          box-shadow: 0 0 60px rgba(0, 255, 136, 0.05);
+        .steps-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
         }
 
-        .pricing-card::before {
+        .step-item {
+          text-align: center;
+        }
+
+        .step-num {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 48px; height: 48px;
+          border-radius: 12px;
+          background: var(--surface-2);
+          border: 1px solid var(--border);
+          font-family: var(--font-display);
+          font-size: 18px;
+          font-weight: 800;
+          color: var(--primary-light);
+          margin-bottom: 16px;
+        }
+
+        .step-name {
+          font-family: var(--font-display);
+          font-size: 14px;
+          font-weight: 700;
+          color: var(--text);
+          margin-bottom: 6px;
+        }
+
+        .step-text {
+          font-family: var(--font-body);
+          font-size: 12px;
+          color: var(--text-muted);
+          line-height: 1.6;
+        }
+
+        /* ===== AUDIENCE ===== */
+        .audience-wrap {
+          max-width: 740px;
+          margin: 0 auto;
+          padding: 0 24px 140px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .audience-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 14px;
+        }
+
+        .audience-card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 14px;
+          padding: 24px;
+          transition: all 0.3s;
+        }
+
+        .audience-card:hover {
+          border-color: var(--border-hover);
+        }
+
+        .audience-icon {
+          font-family: var(--font-mono);
+          font-size: 18px;
+          color: var(--primary-light);
+          margin-bottom: 12px;
+          text-shadow: 0 0 12px var(--glow);
+        }
+
+        .audience-title {
+          font-family: var(--font-display);
+          font-size: 14px;
+          font-weight: 700;
+          color: var(--text);
+          margin-bottom: 6px;
+        }
+
+        .audience-desc {
+          font-family: var(--font-body);
+          font-size: 12px;
+          color: var(--text-muted);
+          line-height: 1.6;
+        }
+
+        /* ===== PRICING ===== */
+        .pricing-wrap {
+          max-width: 680px;
+          margin: 0 auto;
+          padding: 0 24px 140px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .pricing-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+
+        .price-card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          padding: 32px 28px;
+          position: relative;
+        }
+
+        .price-card-pro {
+          border-color: rgba(124, 92, 252, 0.3);
+          box-shadow: 0 0 40px rgba(124, 92, 252, 0.06);
+        }
+
+        .price-card-pro::before {
           content: '';
           position: absolute;
           top: 0; left: 0; right: 0;
           height: 2px;
-          background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
+          background: linear-gradient(90deg, var(--primary), var(--accent));
+          border-radius: 16px 16px 0 0;
         }
 
-        .pricing-label {
-          font-family: var(--font-display);
-          font-size: 11px;
-          color: var(--primary);
-          letter-spacing: 4px;
+        .price-badge {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          font-family: var(--font-mono);
+          font-size: 9px;
+          font-weight: 700;
+          color: #fff;
+          background: var(--primary);
+          border-radius: 4px;
+          padding: 3px 8px;
+          letter-spacing: 1px;
           text-transform: uppercase;
-          margin-bottom: 20px;
         }
 
-        .pricing-value {
-          font-family: var(--font-display);
-          font-size: 48px;
-          font-weight: 800;
-          margin-bottom: 6px;
-        }
-
-        .pricing-period {
-          font-size: 16px;
+        .price-tier {
+          font-family: var(--font-mono);
+          font-size: 11px;
           color: var(--text-muted);
-          font-weight: 400;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          margin-bottom: 16px;
         }
 
-        .pricing-desc {
+        .price-value {
+          font-family: var(--font-display);
+          font-size: 44px;
+          font-weight: 800;
+          color: var(--text);
+          margin-bottom: 4px;
+        }
+
+        .price-value-zero { color: var(--text-muted); }
+
+        .price-period {
           font-family: var(--font-body);
           font-size: 13px;
           color: var(--text-muted);
-          margin: 10px 0 28px;
-          line-height: 1.6;
+          margin-bottom: 24px;
         }
 
-        .pricing-features {
-          text-align: left;
-          margin-bottom: 32px;
+        .price-list {
+          list-style: none;
+          padding: 0;
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 10px;
+          margin-bottom: 28px;
         }
 
-        .pricing-feature {
+        .price-list li {
+          font-family: var(--font-body);
+          font-size: 12px;
+          color: var(--text-muted);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .price-list li::before {
+          content: '✓';
+          color: var(--accent);
+          font-size: 12px;
+          flex-shrink: 0;
+        }
+
+        .price-list-muted li::before {
+          color: var(--text-muted);
+          opacity: 0.4;
+        }
+
+        .btn-price {
+          width: 100%;
           font-family: var(--font-body);
           font-size: 13px;
-          color: #9ba3c7;
-          display: flex;
-          gap: 10px;
-          align-items: center;
-        }
-
-        .pricing-check {
-          color: var(--primary);
-          font-size: 14px;
-          text-shadow: 0 0 8px var(--glow-primary);
-        }
-
-        .btn-pricing {
-          width: 100%;
-          background: linear-gradient(135deg, var(--primary), #3EEDB0);
-          color: #000;
+          font-weight: 600;
           border: none;
-          border-radius: 10px;
-          padding: 16px;
-          font-size: 15px;
-          font-weight: 700;
+          border-radius: 8px;
+          padding: 12px;
           cursor: pointer;
-          font-family: var(--font-display);
-          letter-spacing: 0.5px;
           transition: all 0.3s;
-          box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
         }
 
-        .btn-pricing:hover {
-          box-shadow: 0 0 40px rgba(0, 255, 136, 0.3);
+        .btn-price-free {
+          color: var(--text-muted);
+          background: var(--surface-2);
+          border: 1px solid var(--border);
+        }
+
+        .btn-price-free:hover { border-color: var(--border-hover); color: var(--text); }
+
+        .btn-price-pro {
+          color: #fff;
+          background: var(--primary);
+          box-shadow: 0 4px 20px rgba(124, 92, 252, 0.3);
+        }
+
+        .btn-price-pro:hover {
+          box-shadow: 0 8px 30px rgba(124, 92, 252, 0.45);
           transform: translateY(-1px);
         }
 
-        .pricing-note {
-          font-family: var(--font-body);
-          font-size: 11px;
-          color: #3a3f5c;
-          margin-top: 16px;
-        }
-
-        /* Footer */
-        .footer {
-          border-top: 1px solid var(--border);
-          padding: 28px clamp(16px, 4vw, 40px);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          flex-wrap: wrap;
-          gap: 8px;
-          font-family: var(--font-display);
-          font-size: 11px;
-          color: #3a3f5c;
-          letter-spacing: 1px;
+        /* ===== FINAL CTA ===== */
+        .cta-final {
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 0 24px 120px;
+          text-align: center;
           position: relative;
           z-index: 1;
         }
 
-        /* Responsive */
+        /* ===== FOOTER ===== */
+        .footer {
+          border-top: 1px solid var(--border);
+          padding: 24px clamp(20px, 5vw, 48px);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-family: var(--font-mono);
+          font-size: 11px;
+          color: #2e3050;
+          letter-spacing: 0.5px;
+          position: relative;
+          z-index: 1;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-          .ide-explorer, .ide-preview { display: none !important; }
-          .nav-links-desktop { display: none !important; }
+          .ide-sidebar, .ide-preview-pane { display: none !important; }
+          .nav-desktop { display: none !important; }
           .features-grid { grid-template-columns: 1fr !important; }
+          .steps-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+          .audience-grid { grid-template-columns: 1fr !important; }
+          .pricing-grid { grid-template-columns: 1fr !important; }
         }
 
         @media (min-width: 769px) and (max-width: 1024px) {
@@ -677,67 +825,71 @@ export default function LandingPage() {
         }
       `}</style>
 
-      {/* Background effects */}
+      {/* BG layers */}
       <div className="grid-bg" />
-      <div className="glow-orb-1" />
-      <div className="glow-orb-2" />
+      <div className="glow-orb glow-orb-1" />
+      <div className="glow-orb glow-orb-2" />
 
       {/* Nav */}
-      <nav className="nav-glass">
-        <div className="nav-logo">
-          <span className="nav-logo-symbol">∞</span>
+      <nav className="nav">
+        <div className="nav-brand">
+          <span className="nav-brand-icon">∞</span>
           Infinit Code
         </div>
-        <div className="nav-links">
-          <a href="#features" className="nav-link nav-links-desktop">Features</a>
-          <a href="#pricing" className="nav-link nav-links-desktop">Preços</a>
+        <div className="nav-menu">
+          <a href="#recursos" className="nav-link nav-desktop">Recursos</a>
+          <a href="#precos" className="nav-link nav-desktop">Preços</a>
+          <a href="#como" className="nav-link nav-desktop">Como Funciona</a>
           {session ? (
-            <button onClick={() => router.push('/dashboard')} className="btn-primary">
-              Dashboard
-            </button>
+            <button onClick={() => router.push('/dashboard')} className="btn-nav">Dashboard</button>
           ) : (
-            <button onClick={() => router.push('/auth/login')} className="btn-primary">
-              Entrar
-            </button>
+            <button onClick={() => router.push('/auth/login')} className="btn-nav">Começar grátis →</button>
           )}
         </div>
       </nav>
 
       {/* Hero */}
       <section className="hero">
+        <div className="infinity-bg">∞</div>
+
         <div className="hero-badge">
-          O primeiro IDE feito para IA
+          <span className="hero-badge-dot" />
+          Cloud IDE · Disponível agora
         </div>
-        <h1 className="hero-title">
-          Do prompt ao deploy.<br />
-          <span className="hero-title-gradient">Sem paradas.</span>
+
+        <h1 className="hero-h1">
+          Seu ambiente.<br />
+          <span className="hero-h1-gradient">Sua IA. Seu ritmo.</span>
         </h1>
+
         <p className="hero-sub">
-          Abra o browser e tenha um ambiente completo de desenvolvimento com Claude Code
-          já integrado. Seu próximo projeto está a um prompt de existir.
+          IDE completo no browser com <strong>Claude Code nativo</strong>.
+          Do prompt ao deploy — sem instalar, sem configurar, sem esperar.
         </p>
+
         <div className="hero-actions">
           <button onClick={handleCTA} className="btn-hero">
             Começar a criar →
           </button>
-          <a href="#como" className="btn-outline">
-            Como funciona
+          <a href="#recursos" className="btn-ghost">
+            Ver recursos Pro
           </a>
         </div>
+
+        <p className="hero-note">Sem configuração. Pronto em 30 segundos.</p>
       </section>
 
-      {/* IDE Preview */}
-      <section className="ide-section">
-        <div className="ide-mockup">
-          <div className="ide-titlebar">
-            <div className="ide-dot" style={{ background: '#ff5f57' }} />
-            <div className="ide-dot" style={{ background: '#febc2e' }} />
-            <div className="ide-dot" style={{ background: '#28c840' }} />
-            <span className="ide-titlebar-text">∞ INFINIT CODE IDE</span>
+      {/* IDE Mockup */}
+      <section className="ide-wrap">
+        <div className="ide-frame">
+          <div className="ide-bar">
+            <div className="ide-bar-dot" style={{ background: '#ff5f57' }} />
+            <div className="ide-bar-dot" style={{ background: '#febc2e' }} />
+            <div className="ide-bar-dot" style={{ background: '#28c840' }} />
+            <span className="ide-bar-title">App.tsx — Infinit Code · IDE</span>
           </div>
-          <div className="ide-body">
-            {/* Explorer */}
-            <div className="ide-explorer" style={{ display: undefined }}>
+          <div className="ide-content">
+            <div className="ide-sidebar">
               {[
                 { name: '▸ src', active: false },
                 { name: '  App.tsx', active: true },
@@ -746,243 +898,232 @@ export default function LandingPage() {
                 { name: '  Hero.tsx', active: false },
                 { name: 'package.json', active: false },
               ].map((f, i) => (
-                <div key={i} className={`ide-explorer-item ${f.active ? 'ide-explorer-item-active' : ''}`}>
-                  {f.name}
-                </div>
+                <div key={i} className={`ide-file ${f.active ? 'ide-file-active' : ''}`}>{f.name}</div>
               ))}
             </div>
-            {/* Editor */}
             <div className="ide-editor">
-              <div><span style={{ color: '#5B6CF9' }}>import</span> <span style={{ color: '#e8e8e8' }}>{'{ useState }'}</span> <span style={{ color: '#5B6CF9' }}>from</span> <span style={{ color: '#3EEDB0' }}>{`'react'`}</span></div>
-              <div><span style={{ color: '#5B6CF9' }}>import</span> <span style={{ color: '#e8e8e8' }}>{'{ Hero }'}</span> <span style={{ color: '#5B6CF9' }}>from</span> <span style={{ color: '#3EEDB0' }}>{`'./Hero'`}</span></div>
-              <div style={{ color: '#1a1f38' }}>&nbsp;</div>
-              <div><span style={{ color: '#5B6CF9' }}>export default function</span> <span style={{ color: '#febc2e' }}>App</span><span style={{ color: '#e8e8e8' }}>() {'{'}</span></div>
-              <div><span style={{ color: '#e8e8e8' }}>&nbsp; </span><span style={{ color: '#5B6CF9' }}>const</span> <span style={{ color: '#e8e8e8' }}>[count, setCount] =</span> <span style={{ color: '#febc2e' }}>useState</span><span style={{ color: '#e8e8e8' }}>(0)</span></div>
-              <div><span style={{ color: '#e8e8e8' }}>&nbsp; </span><span style={{ color: '#5B6CF9' }}>return</span> <span style={{ color: '#e8e8e8' }}>{'<Hero count={count} />'}</span></div>
-              <div><span style={{ color: '#e8e8e8' }}>{'}'}</span></div>
+              <div><span style={{ color: '#7c5cfc' }}>import</span> {'{ useState }'} <span style={{ color: '#7c5cfc' }}>from</span> <span style={{ color: '#3EEDB0' }}>{`'react'`}</span></div>
+              <div><span style={{ color: '#7c5cfc' }}>import</span> {'{ Hero }'} <span style={{ color: '#7c5cfc' }}>from</span> <span style={{ color: '#3EEDB0' }}>{`'./Hero'`}</span></div>
+              <div style={{ opacity: 0.1 }}>&nbsp;</div>
+              <div><span style={{ color: '#7c5cfc' }}>export default function</span> <span style={{ color: '#febc2e' }}>App</span>() {'{'}</div>
+              <div>&nbsp; <span style={{ color: '#7c5cfc' }}>const</span> [count, setCount] = <span style={{ color: '#febc2e' }}>useState</span>(0)</div>
+              <div>&nbsp; <span style={{ color: '#7c5cfc' }}>return</span> {'<Hero count={count} />'}</div>
+              <div>{'}'}</div>
             </div>
-            {/* Preview */}
-            <div className="ide-preview">
-              <div className="ide-preview-header">
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3EEDB0', display: 'inline-block', boxShadow: '0 0 6px rgba(62, 237, 176, 0.6)' }} />
+            <div className="ide-preview-pane">
+              <div className="ide-preview-bar">
+                <span className="ide-preview-live" />
                 PREVIEW
               </div>
               <div className="ide-preview-body">
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 40, fontWeight: 800, marginBottom: 12, color: 'var(--text-primary)' }}>0</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, marginBottom: 10 }}>Hello, Infinit Code</div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5, maxWidth: 160, margin: '0 auto 12px' }}>
+                    Live Preview sem configuração. Escreva e veja o resultado.
+                  </div>
                   <div style={{
-                    background: 'linear-gradient(135deg, var(--primary), #3EEDB0)',
-                    color: '#000',
-                    borderRadius: 8,
-                    padding: '8px 20px',
-                    fontSize: 11,
+                    display: 'inline-block',
+                    background: 'var(--primary)',
+                    color: '#fff',
+                    borderRadius: 6,
+                    padding: '6px 14px',
+                    fontSize: 10,
                     fontWeight: 700,
-                    fontFamily: 'var(--font-display)',
-                    letterSpacing: 1,
-                  }}>Incrementar</div>
+                    fontFamily: 'var(--font-mono)',
+                  }}>PRO</div>
                 </div>
               </div>
             </div>
           </div>
-          {/* Terminal */}
-          <div className="ide-terminal">
-            <span style={{ color: '#3EEDB0' }}>❯</span>
+          <div className="ide-terminal-bar">
+            <span style={{ color: 'var(--accent)' }}>$</span>
             <span>claude</span>
-            <span className="terminal-cursor" />
+            <span className="cursor-blink" />
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="features-section">
-        <div style={{ textAlign: 'center', marginBottom: 56 }}>
-          <div className="section-label">Por que Infinit</div>
+      <section id="recursos" className="features-wrap">
+        <div style={{ textAlign: 'center', marginBottom: 64 }}>
+          <div className="section-label"><span>//</span> RECURSOS</div>
           <h2 className="section-title">
-            Seu loop infinito <span style={{ color: 'var(--text-muted)' }}>de criação.</span>
+            Tudo que você precisa<br />para entregar mais rápido.
           </h2>
         </div>
 
         <div className="features-grid">
           {[
             {
-              icon: '{ }',
-              title: 'Editor pro-grade',
-              desc: 'Monaco — o coração do VS Code. Autocomplete, multi-cursor, atalhos que você já conhece.',
-              color: '#5B6CF9',
+              emoji: '⚡',
+              name: 'Live Preview',
+              desc: 'Preview lado a lado para HTML e React. Atualiza em tempo real via WebSocket.',
+              tag: null,
             },
             {
-              icon: '>_',
-              title: 'Seu Linux na nuvem',
+              emoji: '🤖',
+              name: 'Claude Code nativo',
+              desc: 'Pré-instalado com 4 skills exclusivas. Não é um chatbot — lê seu projeto inteiro e executa.',
+              tag: 'PRO',
+            },
+            {
+              emoji: '📦',
+              name: 'Snippets Library',
+              desc: 'Templates prontos para React, Tailwind, CSS, hooks. Um clique e o código está no editor.',
+              tag: 'PRO',
+            },
+            {
+              emoji: '☁️',
+              name: 'Terminal Linux',
               desc: 'Container isolado com Node.js 22. Rode qualquer coisa sem poluir sua máquina.',
-              color: '#3EEDB0',
+              tag: null,
             },
             {
-              icon: '∞',
-              title: 'IA nativa, não colada',
-              desc: 'Claude Code vem pré-instalado com 4 skills exclusivas. Não é um chatbot — é um par que lê seu projeto inteiro.',
-              color: 'var(--primary)',
+              emoji: '🎨',
+              name: 'Editor Monaco',
+              desc: 'O motor do VS Code. Autocomplete, multi-cursor, syntax highlighting, atalhos familiares.',
+              tag: null,
             },
             {
-              icon: '⟳',
-              title: 'Veja enquanto cria',
-              desc: 'Live preview instantâneo. HTML, React, TSX — cada tecla atualiza o resultado.',
-              color: '#febc2e',
-            },
-            {
-              icon: '⑂',
-              title: 'Git sem sair do flow',
-              desc: 'Clone, commit e push pro GitHub direto do IDE. Sem trocar de aba.',
-              color: '#e8e8e8',
-            },
-            {
-              icon: '◇',
-              title: 'Comece mais rápido',
-              desc: 'Snippets prontos para React, HTML, CSS, hooks. Um clique e o código está no editor.',
-              color: '#c084fc',
+              emoji: '🔗',
+              name: 'GitHub integrado',
+              desc: 'Clone, commit e push direto do IDE. OAuth nativo, sem sair do flow.',
+              tag: 'PRO',
             },
           ].map((f) => (
-            <div key={f.title} className="feature-card">
-              <div className="feature-icon" style={{ color: f.color, borderColor: `${f.color}22`, background: `${f.color}0a` }}>
-                {f.icon}
-              </div>
-              <div className="feature-title">{f.title}</div>
-              <div className="feature-desc">{f.desc}</div>
+            <div key={f.name} className="feat-card">
+              <span className="feat-emoji">{f.emoji}</span>
+              <div className="feat-name">{f.name}</div>
+              <div className="feat-desc">{f.desc}</div>
+              {f.tag && <span className="feat-tag">{f.tag}</span>}
             </div>
           ))}
         </div>
       </section>
 
       {/* How it works */}
-      <section id="como" className="steps-section">
-        <div style={{ textAlign: 'center', marginBottom: 56 }}>
-          <div className="section-label">Como funciona</div>
+      <section id="como" className="steps-wrap">
+        <div style={{ textAlign: 'center', marginBottom: 64 }}>
+          <div className="section-label"><span>//</span> COMO FUNCIONA</div>
           <h2 className="section-title">
-            Abra o browser. <span style={{ color: 'var(--text-muted)' }}>Comece a criar.</span>
+            No ar em<br />minutos.
           </h2>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="steps-grid">
           {[
-            { step: '01', title: 'Entre com Google', desc: 'Um clique. Sem formulário, sem confirmar email, sem esperar.' },
-            { step: '02', title: 'Seu IDE carrega', desc: 'Editor, terminal e preview prontos em segundos. Container Linux exclusivo pra você.' },
-            { step: '03', title: 'Chame o Claude', desc: 'Digite claude no terminal. Ele já conhece seus arquivos, já tem as skills. Só pedir.' },
+            { num: '1', name: 'Entre', desc: 'Login com Google. Um clique, sem formulário.' },
+            { num: '2', name: 'Abra o IDE', desc: 'Editor, terminal e preview carregam em segundos.' },
+            { num: '3', name: 'Chame o Claude', desc: 'Digite claude no terminal. As skills já estão prontas.' },
           ].map((s) => (
-            <div key={s.step} className="step-card">
-              <span className="step-number">{s.step}</span>
-              <div>
-                <div className="step-title">{s.title}</div>
-                <div className="step-desc">{s.desc}</div>
-              </div>
+            <div key={s.num} className="step-item">
+              <div className="step-num">{s.num}</div>
+              <div className="step-name">{s.name}</div>
+              <div className="step-text">{s.desc}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Para quem */}
-      <section className="steps-section">
-        <div style={{ textAlign: 'center', marginBottom: 56 }}>
-          <div className="section-label">Pra quem é</div>
+      {/* Audience */}
+      <section className="audience-wrap">
+        <div style={{ textAlign: 'center', marginBottom: 64 }}>
+          <div className="section-label"><span>//</span> PRA QUEM</div>
           <h2 className="section-title">
-            Se você se reconhece, <span style={{ color: 'var(--text-muted)' }}>é pra você.</span>
+            Se você se reconhece,<br />é pra você.
           </h2>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+        <div className="audience-grid">
           {[
-            {
-              emoji: '❯',
-              title: 'Dev que usa Claude Code',
-              desc: 'Quer um ambiente cloud com o Claude já pronto, sem instalar nada local.',
-            },
-            {
-              emoji: '△',
-              title: 'Indie maker',
-              desc: 'Valida ideias rápido. Precisa ir do zero ao deploy no mesmo dia.',
-            },
-            {
-              emoji: '⊞',
-              title: 'Dev em qualquer máquina',
-              desc: 'Chromebook, tablet, PC do trabalho — seu IDE está no browser.',
-            },
-            {
-              emoji: '⟡',
-              title: 'Quem está aprendendo',
-              desc: 'Ambiente profissional sem a dor de configurar ambiente. Foco no código.',
-            },
-          ].map((p) => (
-            <div key={p.title} className="step-card" style={{ flexDirection: 'column', gap: 12 }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--primary)', textShadow: '0 0 12px var(--glow-primary)' }}>{p.emoji}</span>
-              <div>
-                <div className="step-title">{p.title}</div>
-                <div className="step-desc">{p.desc}</div>
-              </div>
+            { icon: '❯_', title: 'Dev que usa Claude Code', desc: 'Ambiente cloud com Claude pré-instalado. Sem configurar nada local.' },
+            { icon: '△', title: 'Indie maker', desc: 'Do zero ao deploy no mesmo dia. Valide rápido, itere mais rápido.' },
+            { icon: '⊞', title: 'Qualquer máquina', desc: 'Chromebook, tablet, PC do trabalho. Seu IDE está no browser.' },
+            { icon: '⟡', title: 'Quem está aprendendo', desc: 'Ambiente profissional sem a dor de configurar. Foco no código.' },
+          ].map((a) => (
+            <div key={a.title} className="audience-card">
+              <div className="audience-icon">{a.icon}</div>
+              <div className="audience-title">{a.title}</div>
+              <div className="audience-desc">{a.desc}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="pricing-section">
-        <div style={{ textAlign: 'center', marginBottom: 56 }}>
-          <div className="section-label">Preço</div>
+      <section id="precos" className="pricing-wrap">
+        <div style={{ textAlign: 'center', marginBottom: 64 }}>
+          <div className="section-label"><span>//</span> PREÇOS</div>
           <h2 className="section-title">
-            Um plano. <span style={{ color: 'var(--text-muted)' }}>Sem surpresas.</span>
+            Preço simples.
           </h2>
         </div>
 
-        <div className="pricing-card">
-          <div className="pricing-label">Pro</div>
-          <div className="pricing-value">
-            R$67<span className="pricing-period">/mês</span>
+        <div className="pricing-grid">
+          {/* Free */}
+          <div className="price-card">
+            <div className="price-tier">Free</div>
+            <div className="price-value price-value-zero">
+              R$<span style={{ fontSize: 44 }}>0</span>
+            </div>
+            <div className="price-period">para sempre</div>
+            <ul className="price-list price-list-muted">
+              <li>Live Preview (HTML + React)</li>
+              <li>Overlay básico de erros</li>
+              <li>AI Chat</li>
+              <li>Snippets limitados</li>
+            </ul>
+            <button onClick={handleCTA} className="btn-price btn-price-free">
+              Começar grátis →
+            </button>
           </div>
-          <p className="pricing-desc">
-            Menos que um almoço por semana. IDE completo + IA nativa + infra na nuvem.
-          </p>
-          <div className="pricing-features">
-            {[
-              'Editor Monaco completo (VS Code engine)',
-              'Terminal Linux com Node.js 22',
-              'Claude Code pré-instalado + 4 skills',
-              'Clone e push pro GitHub integrado',
-              'Live preview (HTML, React, TSX)',
-              'Container isolado por usuário',
-              'Servidores em São Paulo (latência mínima)',
-              'Custo de IA = zero (usa sua conta Claude)',
-            ].map((item) => (
-              <div key={item} className="pricing-feature">
-                <span className="pricing-check">✓</span>
-                {item}
-              </div>
-            ))}
+
+          {/* Pro */}
+          <div className="price-card price-card-pro">
+            <span className="price-badge">Popular</span>
+            <div className="price-tier">Pro</div>
+            <div className="price-value">
+              R$<span style={{ fontSize: 44 }}>67</span>
+            </div>
+            <div className="price-period">/ mês · cancele quando quiser</div>
+            <ul className="price-list">
+              <li>Tudo do Free</li>
+              <li>Claude Code nativo + 4 skills</li>
+              <li>Smart Snippets Library</li>
+              <li>GitHub clone/push integrado</li>
+              <li>Container Linux isolado</li>
+              <li>Servidores São Paulo</li>
+              <li>Suporte prioritário</li>
+            </ul>
+            <button onClick={handleCTA} className="btn-price btn-price-pro">
+              Assinar Pro → R$67/mês →
+            </button>
           </div>
-          <button onClick={handleCTA} className="btn-pricing">
-            Começar agora →
-          </button>
-          <p className="pricing-note">
-            Você usa sua própria conta claude.ai. Infinit Code cobra só pela infra — a IA é por sua conta, literalmente.
-          </p>
         </div>
+
+        <p style={{
+          textAlign: 'center',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          color: '#2e3050',
+          marginTop: 20,
+        }}>
+          * A IA usa sua conta claude.ai. Custo de IA = zero pro Infinit Code.
+        </p>
       </section>
 
       {/* Final CTA */}
-      <section style={{
-        maxWidth: 600,
-        margin: '0 auto',
-        padding: '0 24px 100px',
-        textAlign: 'center',
-        position: 'relative',
-        zIndex: 1,
-      }}>
-        <h2 className="section-title" style={{ marginBottom: 16 }}>
+      <section className="cta-final">
+        <h2 className="section-title" style={{ marginBottom: 20 }}>
           Seu próximo projeto<br />
-          <span className="hero-title-gradient">começa aqui.</span>
+          <span className="hero-h1-gradient">começa aqui.</span>
         </h2>
         <p style={{
           fontFamily: 'var(--font-body)',
           fontSize: 15,
           color: 'var(--text-muted)',
           lineHeight: 1.7,
-          marginBottom: 32,
+          marginBottom: 36,
         }}>
           Sem instalar. Sem configurar. Sem esperar.<br />
           Abre o browser e o futuro do desenvolvimento já está rodando.
@@ -994,8 +1135,8 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="footer">
-        <span>∞ Infinit Code — {new Date().getFullYear()}</span>
-        <span style={{ color: '#2a2f48' }}>Feito com Claude Code</span>
+        <span>Feito com ∞ por Infinit Code</span>
+        <span>support@infinitcode.netlify.app</span>
       </footer>
     </div>
   );

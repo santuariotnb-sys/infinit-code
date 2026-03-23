@@ -706,22 +706,22 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="hero">
         <div className="hero-badge">
-          Web IDE &nbsp;·&nbsp; Claude Code &nbsp;·&nbsp; Deploy
+          O primeiro IDE feito para IA
         </div>
         <h1 className="hero-title">
-          Code no browser.<br />
-          <span className="hero-title-gradient">Ship com IA.</span>
+          Do prompt ao deploy.<br />
+          <span className="hero-title-gradient">Sem paradas.</span>
         </h1>
         <p className="hero-sub">
-          IDE profissional no browser com editor Monaco, terminal cloud, live preview
-          e Claude Code integrado. Zero setup. Zero config.
+          Abra o browser e tenha um ambiente completo de desenvolvimento com Claude Code
+          já integrado. Seu próximo projeto está a um prompt de existir.
         </p>
         <div className="hero-actions">
           <button onClick={handleCTA} className="btn-hero">
-            Começar agora →
+            Começar a criar →
           </button>
-          <a href="#features" className="btn-outline">
-            Ver features
+          <a href="#como" className="btn-outline">
+            Como funciona
           </a>
         </div>
       </section>
@@ -796,9 +796,9 @@ export default function LandingPage() {
       {/* Features */}
       <section id="features" className="features-section">
         <div style={{ textAlign: 'center', marginBottom: 56 }}>
-          <div className="section-label">Features</div>
+          <div className="section-label">Por que Infinit</div>
           <h2 className="section-title">
-            Tudo que você precisa. <span style={{ color: 'var(--text-muted)' }}>No browser.</span>
+            Seu loop infinito <span style={{ color: 'var(--text-muted)' }}>de criação.</span>
           </h2>
         </div>
 
@@ -806,38 +806,38 @@ export default function LandingPage() {
           {[
             {
               icon: '{ }',
-              title: 'Monaco Editor',
-              desc: 'O mesmo editor do VS Code. Syntax highlighting, autocomplete, multi-cursor.',
+              title: 'Editor pro-grade',
+              desc: 'Monaco — o coração do VS Code. Autocomplete, multi-cursor, atalhos que você já conhece.',
               color: '#5B6CF9',
             },
             {
               icon: '>_',
-              title: 'Terminal Cloud',
-              desc: 'Container isolado com Node.js 22. Seu ambiente completo no browser.',
+              title: 'Seu Linux na nuvem',
+              desc: 'Container isolado com Node.js 22. Rode qualquer coisa sem poluir sua máquina.',
               color: '#3EEDB0',
             },
             {
               icon: '∞',
-              title: 'Claude Code',
-              desc: 'Claude Code pré-instalado com skills Infinit Code. Use sua própria conta.',
+              title: 'IA nativa, não colada',
+              desc: 'Claude Code vem pré-instalado com 4 skills exclusivas. Não é um chatbot — é um par que lê seu projeto inteiro.',
               color: 'var(--primary)',
             },
             {
               icon: '⟳',
-              title: 'Live Preview',
-              desc: 'Preview em tempo real. HTML, React, TSX — atualiza enquanto você digita.',
+              title: 'Veja enquanto cria',
+              desc: 'Live preview instantâneo. HTML, React, TSX — cada tecla atualiza o resultado.',
               color: '#febc2e',
             },
             {
               icon: '⑂',
-              title: 'GitHub Sync',
-              desc: 'Clone, commit e push direto do IDE. OAuth integrado.',
+              title: 'Git sem sair do flow',
+              desc: 'Clone, commit e push pro GitHub direto do IDE. Sem trocar de aba.',
               color: '#e8e8e8',
             },
             {
               icon: '◇',
-              title: 'Snippets',
-              desc: 'Biblioteca de code snippets. Busque e insira com um clique.',
+              title: 'Comece mais rápido',
+              desc: 'Snippets prontos para React, HTML, CSS, hooks. Um clique e o código está no editor.',
               color: '#c084fc',
             },
           ].map((f) => (
@@ -853,19 +853,19 @@ export default function LandingPage() {
       </section>
 
       {/* How it works */}
-      <section className="steps-section">
+      <section id="como" className="steps-section">
         <div style={{ textAlign: 'center', marginBottom: 56 }}>
           <div className="section-label">Como funciona</div>
           <h2 className="section-title">
-            3 passos. <span style={{ color: 'var(--text-muted)' }}>Zero config.</span>
+            Abra o browser. <span style={{ color: 'var(--text-muted)' }}>Comece a criar.</span>
           </h2>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {[
-            { step: '01', title: 'Faça login', desc: 'Google ou GitHub. Sem criar conta.' },
-            { step: '02', title: 'Abra o IDE', desc: 'Editor, preview e terminal carregam instantaneamente.' },
-            { step: '03', title: 'Conecte o Claude', desc: 'Digite `claude` no terminal. Autentique com sua conta claude.ai. As skills já estão lá.' },
+            { step: '01', title: 'Entre com Google', desc: 'Um clique. Sem formulário, sem confirmar email, sem esperar.' },
+            { step: '02', title: 'Seu IDE carrega', desc: 'Editor, terminal e preview prontos em segundos. Container Linux exclusivo pra você.' },
+            { step: '03', title: 'Chame o Claude', desc: 'Digite claude no terminal. Ele já conhece seus arquivos, já tem as skills. Só pedir.' },
           ].map((s) => (
             <div key={s.step} className="step-card">
               <span className="step-number">{s.step}</span>
@@ -878,12 +878,55 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Para quem */}
+      <section className="steps-section">
+        <div style={{ textAlign: 'center', marginBottom: 56 }}>
+          <div className="section-label">Pra quem é</div>
+          <h2 className="section-title">
+            Se você se reconhece, <span style={{ color: 'var(--text-muted)' }}>é pra você.</span>
+          </h2>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+          {[
+            {
+              emoji: '❯',
+              title: 'Dev que usa Claude Code',
+              desc: 'Quer um ambiente cloud com o Claude já pronto, sem instalar nada local.',
+            },
+            {
+              emoji: '△',
+              title: 'Indie maker',
+              desc: 'Valida ideias rápido. Precisa ir do zero ao deploy no mesmo dia.',
+            },
+            {
+              emoji: '⊞',
+              title: 'Dev em qualquer máquina',
+              desc: 'Chromebook, tablet, PC do trabalho — seu IDE está no browser.',
+            },
+            {
+              emoji: '⟡',
+              title: 'Quem está aprendendo',
+              desc: 'Ambiente profissional sem a dor de configurar ambiente. Foco no código.',
+            },
+          ].map((p) => (
+            <div key={p.title} className="step-card" style={{ flexDirection: 'column', gap: 12 }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--primary)', textShadow: '0 0 12px var(--glow-primary)' }}>{p.emoji}</span>
+              <div>
+                <div className="step-title">{p.title}</div>
+                <div className="step-desc">{p.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Pricing */}
       <section id="pricing" className="pricing-section">
         <div style={{ textAlign: 'center', marginBottom: 56 }}>
           <div className="section-label">Preço</div>
           <h2 className="section-title">
-            Simples e <span style={{ color: 'var(--text-muted)' }}>transparente.</span>
+            Um plano. <span style={{ color: 'var(--text-muted)' }}>Sem surpresas.</span>
           </h2>
         </div>
 
@@ -893,18 +936,18 @@ export default function LandingPage() {
             R$67<span className="pricing-period">/mês</span>
           </div>
           <p className="pricing-desc">
-            Acesso completo ao IDE + container cloud + todas as skills
+            Menos que um almoço por semana. IDE completo + IA nativa + infra na nuvem.
           </p>
           <div className="pricing-features">
             {[
-              'Monaco Editor completo',
-              'Terminal com Node.js 22',
-              'Claude Code pré-instalado',
-              '4 skills Infinit Code',
-              'GitHub clone/push',
-              'Live preview (HTML + React)',
+              'Editor Monaco completo (VS Code engine)',
+              'Terminal Linux com Node.js 22',
+              'Claude Code pré-instalado + 4 skills',
+              'Clone e push pro GitHub integrado',
+              'Live preview (HTML, React, TSX)',
               'Container isolado por usuário',
-              'Região São Paulo (gru)',
+              'Servidores em São Paulo (latência mínima)',
+              'Custo de IA = zero (usa sua conta Claude)',
             ].map((item) => (
               <div key={item} className="pricing-feature">
                 <span className="pricing-check">✓</span>
@@ -913,12 +956,40 @@ export default function LandingPage() {
             ))}
           </div>
           <button onClick={handleCTA} className="btn-pricing">
-            Assinar Pro →
+            Começar agora →
           </button>
           <p className="pricing-note">
-            * IA usa sua própria conta Claude (claude.ai). Custo de IA = zero pro Infinit Code.
+            Você usa sua própria conta claude.ai. Infinit Code cobra só pela infra — a IA é por sua conta, literalmente.
           </p>
         </div>
+      </section>
+
+      {/* Final CTA */}
+      <section style={{
+        maxWidth: 600,
+        margin: '0 auto',
+        padding: '0 24px 100px',
+        textAlign: 'center',
+        position: 'relative',
+        zIndex: 1,
+      }}>
+        <h2 className="section-title" style={{ marginBottom: 16 }}>
+          Seu próximo projeto<br />
+          <span className="hero-title-gradient">começa aqui.</span>
+        </h2>
+        <p style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: 15,
+          color: 'var(--text-muted)',
+          lineHeight: 1.7,
+          marginBottom: 32,
+        }}>
+          Sem instalar. Sem configurar. Sem esperar.<br />
+          Abre o browser e o futuro do desenvolvimento já está rodando.
+        </p>
+        <button onClick={handleCTA} className="btn-hero">
+          Criar meu primeiro projeto →
+        </button>
       </section>
 
       {/* Footer */}

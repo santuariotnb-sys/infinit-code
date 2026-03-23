@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { SessionProvider2 } from './providers';
 
 export const metadata: Metadata = {
-  title: 'Infinit Code — Web IDE com Claude Code',
-  description: 'IDE profissional no browser. Editor Monaco, terminal cloud, live preview e Claude Code integrado. Sem instalar nada.',
+  title: 'Infinit Code — Do prompt ao deploy. Sem paradas.',
+  description: 'O primeiro IDE feito para IA. Editor Monaco, terminal Linux, live preview e Claude Code nativo. Abra o browser e comece a criar.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

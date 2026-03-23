@@ -245,7 +245,7 @@ export function IDELayout() {
             />
           )}
           {mobileTab === 'editor' && <EditorPanel />}
-          {mobileTab === 'preview' && <PreviewPanel machine={machine} sendCommand={handleRunCommand} />}
+          {mobileTab === 'preview' && <PreviewPanel machine={machine} sendCommand={terminalSendCommand} />}
           {mobileTab === 'explorer' && (
             <div style={{ height: '100%', overflow: 'auto' }}>
               <FileExplorer />
@@ -375,7 +375,7 @@ export function IDELayout() {
             </div>
             {showPreview && (
               <div style={{ flex: 1, overflow: 'hidden' }}>
-                <PreviewPanel machine={machine} sendCommand={handleRunCommand} />
+                <PreviewPanel machine={machine} sendCommand={terminalSendCommand} />
               </div>
             )}
           </div>

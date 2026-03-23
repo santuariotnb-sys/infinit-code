@@ -32,27 +32,37 @@ async function getUserMachine(email: string) {
 }
 
 async function proxyToContainer(req: NextRequest, machineId: string, path: string): Promise<Response> {
+  // Fly.io Anycast: porta 3000 com TLS handler definido nos services
+  // fly-force-instance-id funciona na internet pública para rotear à machine correta
   const url = `https://${FLY_APP_NAME}.fly.dev:3000${path}`;
 
-  const res = await fetch(url, {
-    method: req.method,
-    headers: {
-      'fly-force-instance-id': machineId,
-    },
-    redirect: 'manual',
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
 
-  // Reescreve o content-type para manter o tipo correto
-  const headers = new Headers();
-  const contentType = res.headers.get('content-type');
-  if (contentType) headers.set('content-type', contentType);
-  // Permite iframe embedding
-  headers.set('X-Frame-Options', 'SAMEORIGIN');
+  try {
+    const res = await fetch(url, {
+      method: req.method,
+      headers: {
+        'fly-force-instance-id': machineId,
+      },
+      redirect: 'manual',
+      signal: controller.signal,
+    });
 
-  return new Response(res.body, {
-    status: res.status,
-    headers,
-  });
+    const headers = new Headers();
+    const contentType = res.headers.get('content-type');
+    if (contentType) headers.set('content-type', contentType);
+    headers.set('X-Frame-Options', 'SAMEORIGIN');
+    // Cacheia por pouco tempo para evitar spam de requests
+    headers.set('Cache-Control', 'no-cache');
+
+    return new Response(res.body, {
+      status: res.status,
+      headers,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export async function GET(req: NextRequest) {

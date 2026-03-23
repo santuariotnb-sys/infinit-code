@@ -41,26 +41,50 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
     };
   }, [activeFile?.content, activeFile?.name, activeFile?.id, isContainerMode]);
 
-  // Container mode
+  // Container mode: check dev server + auto-start
+  const checkServer = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/ide/preview?path=/&_check=1&_t=${Date.now()}`);
+      const text = await res.text();
+      if (text.includes('Dev server não está rodando') || text.includes('Nenhum container ativo')) {
+        return false;
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const startDevServer = useCallback(() => {
+    if (!sendCommand) return;
+    startedRef.current = true;
+    setDevServerStatus('starting');
+    // Checa se tem package.json antes de rodar — navega pro subdiretório se necessário
+    sendCommand('cd /root/workspace && DIR=$(ls -d */ 2>/dev/null | head -1) && if [ -f package.json ]; then npm run dev 2>&1; elif [ -n "$DIR" ] && [ -f "$DIR/package.json" ]; then cd "$DIR" && npm install && npm run dev 2>&1; else echo "Nenhum projeto encontrado — clone um repo primeiro"; fi');
+
+    // Poll until server is up (max 60s)
+    let attempts = 0;
+    if (pollingRef.current) clearInterval(pollingRef.current);
+    pollingRef.current = setInterval(async () => {
+      attempts++;
+      const up = await checkServer();
+      if (up) {
+        setDevServerStatus('running');
+        setRefreshKey(k => k + 1);
+        if (pollingRef.current) clearInterval(pollingRef.current);
+      } else if (attempts > 20) {
+        setDevServerStatus('failed');
+        if (pollingRef.current) clearInterval(pollingRef.current);
+      }
+    }, 3000);
+  }, [sendCommand, checkServer]);
+
   useEffect(() => {
     if (!isContainerMode) {
       setDevServerStatus('unknown');
       startedRef.current = false;
       return;
     }
-
-    const checkServer = async () => {
-      try {
-        const res = await fetch(`/api/ide/preview?path=/&_check=1&_t=${Date.now()}`);
-        const text = await res.text();
-        if (text.includes('Dev server não está rodando') || text.includes('Nenhum container ativo')) {
-          return false;
-        }
-        return true;
-      } catch {
-        return false;
-      }
-    };
 
     const init = async () => {
       const running = await checkServer();
@@ -70,25 +94,10 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
         return;
       }
 
+      // Auto-start only once per mount
       if (!startedRef.current && sendCommand) {
-        startedRef.current = true;
-        setDevServerStatus('starting');
-        sendCommand('npm run dev 2>/dev/null || npx next dev 2>/dev/null || npx vite 2>/dev/null || echo "Nenhum dev server encontrado"');
-
-        let attempts = 0;
-        pollingRef.current = setInterval(async () => {
-          attempts++;
-          const up = await checkServer();
-          if (up) {
-            setDevServerStatus('running');
-            setRefreshKey(k => k + 1);
-            if (pollingRef.current) clearInterval(pollingRef.current);
-          } else if (attempts > 15) {
-            setDevServerStatus('failed');
-            if (pollingRef.current) clearInterval(pollingRef.current);
-          }
-        }, 3000);
-      } else {
+        startDevServer();
+      } else if (!sendCommand) {
         setDevServerStatus('failed');
       }
     };
@@ -98,7 +107,7 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-  }, [isContainerMode, machine?.id, sendCommand]);
+  }, [isContainerMode, machine?.id, sendCommand, checkServer, startDevServer]);
 
   const handleRefresh = useCallback(() => {
     setRefreshKey(k => k + 1);
@@ -106,11 +115,11 @@ export function PreviewPanel({ machine, sendCommand }: PreviewPanelProps) {
 
   const handleRetryDevServer = useCallback(() => {
     if (sendCommand) {
+      if (pollingRef.current) clearInterval(pollingRef.current);
       startedRef.current = false;
-      setDevServerStatus('unknown');
-      setRefreshKey(k => k + 1);
+      startDevServer();
     }
-  }, [sendCommand]);
+  }, [sendCommand, startDevServer]);
 
   // Empty state
   if (!isContainerMode && !activeFile) {

@@ -59,9 +59,14 @@ export function IntelliChat({ terminalSendCommand, terminalOutput, onOutputSubsc
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const responseBufferRef = useRef('');
-  const lastPromptRef = useRef('');
+  const isRespondingRef = useRef(false); // ref para subscriber não ficar stale
+  const responseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const claudeRunningRef = useRef(false);
 
   const { openFiles, openFile: storeOpenFile, files } = useIDEStore();
+
+  // Sync ref with state
+  useEffect(() => { isRespondingRef.current = isResponding; }, [isResponding]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -76,50 +81,75 @@ export function IntelliChat({ terminalSendCommand, terminalOutput, onOutputSubsc
     }
   }, [input]);
 
-  // Subscribe to terminal output
-  useEffect(() => {
-    const unsub = onOutputSubscribe((line: string) => {
-      const clean = stripAnsi(line);
+  // Flush response buffer → message
+  const flushResponse = useCallback(() => {
+    const response = stripAnsi(responseBufferRef.current).trim();
+    if (response) {
+      const id = Date.now().toString() + Math.random().toString(36).slice(2);
+      setMessages(prev => [...prev, { id, role: 'assistant', content: response, timestamp: new Date() }]);
+    }
+    responseBufferRef.current = '';
+    setIsResponding(false);
+    if (responseTimeoutRef.current) {
+      clearTimeout(responseTimeoutRef.current);
+      responseTimeoutRef.current = null;
+    }
+  }, []);
 
-      // Detect Claude Code status
-      if (clean.includes('claude>') || clean.includes('Claude>')) {
-        if (isResponding) {
-          // Claude finished responding
-          const response = responseBufferRef.current.trim();
-          if (response) {
-            addAssistantMessage(response);
-          }
-          responseBufferRef.current = '';
-          setIsResponding(false);
+  // Subscribe to terminal output — stable ref, no isResponding in deps
+  useEffect(() => {
+    // Claude Code prompt patterns (with or without ANSI)
+    const promptPattern = /(?:claude|❯|>)\s*$/;
+
+    const unsub = onOutputSubscribe((chunk: string) => {
+      const clean = stripAnsi(chunk);
+
+      // Detect Claude Code prompt → response finished
+      if (promptPattern.test(clean.trim())) {
+        claudeRunningRef.current = true;
+        if (isRespondingRef.current) {
+          flushResponse();
         }
         setStatus('Pronto');
-      } else if (clean.includes('Thinking') || clean.includes('thinking') || clean.includes('...')) {
-        if (isResponding) setStatus('Pensando...');
+        return;
       }
 
-      // Accumulate response
-      if (isResponding) {
-        responseBufferRef.current += line;
+      // Detect "Thinking" status (specific, not generic "...")
+      if (isRespondingRef.current && /think/i.test(clean)) {
+        setStatus('Pensando...');
+      }
+
+      // Accumulate response while responding
+      if (isRespondingRef.current) {
+        responseBufferRef.current += chunk;
+        // Reset timeout — if no new output for 20s, flush
+        if (responseTimeoutRef.current) clearTimeout(responseTimeoutRef.current);
+        responseTimeoutRef.current = setTimeout(() => {
+          if (isRespondingRef.current) {
+            flushResponse();
+            setStatus('Pronto');
+          }
+        }, 20000);
       }
     });
     return unsub;
-  }, [onOutputSubscribe, isResponding]);
+  }, [onOutputSubscribe, flushResponse]);
 
   // Update status based on machine
   useEffect(() => {
     if (!machine) {
       setStatus('Desconectado');
+      claudeRunningRef.current = false;
     } else if (status === 'Desconectado') {
       setStatus('Pronto');
     }
   }, [machine]);
 
-  // Detect if Claude Code is running
-  const claudeRunning = terminalOutput.includes('claude>') || terminalOutput.includes('Claude>');
-
-  const addAssistantMessage = useCallback((content: string) => {
-    const id = Date.now().toString() + Math.random().toString(36).slice(2);
-    setMessages(prev => [...prev, { id, role: 'assistant', content, timestamp: new Date() }]);
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (responseTimeoutRef.current) clearTimeout(responseTimeoutRef.current);
+    };
   }, []);
 
   const handleSend = useCallback(() => {
@@ -146,7 +176,7 @@ export function IntelliChat({ terminalSendCommand, terminalOutput, onOutputSubsc
     }
 
     // Send to terminal
-    if (!claudeRunning) {
+    if (!claudeRunningRef.current) {
       // Start Claude Code first
       setStatus('Iniciando...');
       terminalSendCommand('claude --dangerously-skip-permissions');
@@ -155,14 +185,14 @@ export function IntelliChat({ terminalSendCommand, terminalOutput, onOutputSubsc
         setIsResponding(true);
         setStatus('Pensando...');
         responseBufferRef.current = '';
-      }, 1500);
+      }, 2500);
     } else {
       terminalSendCommand(fullText);
       setIsResponding(true);
       setStatus('Pensando...');
       responseBufferRef.current = '';
     }
-  }, [input, attachments, claudeRunning, terminalSendCommand]);
+  }, [input, attachments, terminalSendCommand]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -207,22 +237,35 @@ export function IntelliChat({ terminalSendCommand, terminalOutput, onOutputSubsc
 
   const suggestions = getSuggestions(activeFile);
 
-  // Render code blocks, file paths, commands
+  // Render code blocks, file paths
   const renderContent = (text: string) => {
-    const parts = text.split(/(```[\s\S]*?```|`[^`]+`|\*\*[^*]+\*\*|\/root\/workspace\/\S+|^\$\s.+|^npm\s.+|^npx\s.+)/gm);
+    const parts = text.split(/(```[\s\S]*?```|`[^`]+`|\*\*[^*]+\*\*|\/root\/workspace\/\S+)/gm);
     return parts.map((p, i) => {
       // Code blocks
       if (p.startsWith('```') && p.endsWith('```')) {
-        const code = p.slice(3, -3).replace(/^\w+\n/, '');
+        const raw = p.slice(3, -3);
+        const code = raw.replace(/^\w+\n/, '');
+        // Detect if it's a shell command block
+        const isShell = /^(sh|bash|shell|zsh)?\n/i.test(raw) || /^\$\s/.test(code.trim());
         return (
           <div key={i} style={{ position: 'relative', margin: '8px 0' }}>
             <pre style={{ background: '#0a0a0a', border: '1px solid #1c2340', borderRadius: 6, padding: '8px 12px', overflow: 'auto', fontSize: 11, color: '#AEB6D8', fontFamily: "'JetBrains Mono', monospace" }}>{code}</pre>
-            <button
-              onClick={() => navigator.clipboard.writeText(code)}
-              style={{ position: 'absolute', top: 4, right: 4, background: '#1c2340', border: 'none', borderRadius: 3, color: '#5A6080', fontSize: 9, padding: '2px 6px', cursor: 'pointer', fontFamily: 'monospace' }}
-            >
-              Copiar
-            </button>
+            <div style={{ position: 'absolute', top: 4, right: 4, display: 'flex', gap: 4 }}>
+              {isShell && (
+                <button
+                  onClick={() => terminalSendCommand(code.replace(/^\$\s*/gm, '').trim())}
+                  style={{ background: 'rgba(0,255,136,.15)', border: 'none', borderRadius: 3, color: '#3EEDB0', fontSize: 9, padding: '2px 6px', cursor: 'pointer', fontFamily: 'monospace' }}
+                >
+                  Executar
+                </button>
+              )}
+              <button
+                onClick={() => navigator.clipboard.writeText(code)}
+                style={{ background: '#1c2340', border: 'none', borderRadius: 3, color: '#5A6080', fontSize: 9, padding: '2px 6px', cursor: 'pointer', fontFamily: 'monospace' }}
+              >
+                Copiar
+              </button>
+            </div>
           </div>
         );
       }
@@ -241,7 +284,6 @@ export function IntelliChat({ terminalSendCommand, terminalOutput, onOutputSubsc
           <button
             key={i}
             onClick={() => {
-              // Try to open file in editor
               const node = findFileByPath(files, p.replace('/root/workspace/', ''));
               if (node) storeOpenFile(node);
             }}
@@ -262,22 +304,6 @@ export function IntelliChat({ terminalSendCommand, terminalOutput, onOutputSubsc
           >
             📄 {fileName}
           </button>
-        );
-      }
-      // Commands
-      if (/^\$\s/.test(p) || /^npm\s/.test(p) || /^npx\s/.test(p)) {
-        const cmd = p.replace(/^\$\s*/, '');
-        return (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#0f1428', border: '1px solid #1c2340', borderRadius: 4, padding: '4px 8px', margin: '4px 0' }}>
-            <span style={{ color: '#5A6080', fontSize: 11 }}>{'>'}_</span>
-            <code style={{ flex: 1, fontSize: 11, color: '#AEB6D8' }}>{cmd}</code>
-            <button
-              onClick={() => terminalSendCommand(cmd)}
-              style={{ background: '#1c2340', border: 'none', borderRadius: 3, color: '#3EEDB0', fontSize: 9, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
-            >
-              Executar
-            </button>
-          </div>
         );
       }
       return <span key={i}>{p}</span>;

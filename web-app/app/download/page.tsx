@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 
 const VERSION = '1.0.0';
 const RELEASE_DATE = '2026-03-23';
-const REPO = 'https://github.com/santuariotnb-sys/infinit-code-desktop/releases/latest';
+const BASE = 'https://github.com/santuariotnb-sys/infinit-code-desktop/releases/download/v1.0.0';
 const RELEASES = 'https://github.com/santuariotnb-sys/infinit-code-desktop/releases';
 
 type OS = 'mac-arm' | 'mac-intel' | 'windows' | 'linux' | 'unknown';
@@ -31,7 +31,7 @@ const downloads = [
         <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
       </svg>
     ),
-    href: `${REPO}/download/Infinit-Code-${VERSION}-arm64.dmg`,
+    href: `${BASE}/Infinit.Code-${VERSION}-arm64.dmg`,
   },
   {
     id: 'mac-intel' as OS,
@@ -42,7 +42,7 @@ const downloads = [
         <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
       </svg>
     ),
-    href: `${REPO}/download/Infinit-Code-${VERSION}.dmg`,
+    href: `${BASE}/Infinit.Code-${VERSION}-arm64.dmg`,
   },
   {
     id: 'windows' as OS,
@@ -53,18 +53,18 @@ const downloads = [
         <path d="M3 5.557l7.357-1.002.003 7.097-7.354.042L3 5.557zm7.354 6.913l.004 7.101-7.354-1.01v-6.14l7.35.049zm.892-8.046L21.001 3v8.562l-9.755.077V4.424zm9.758 8.113l-.003 8.516-9.755-1.37-.014-7.191 9.772.045z"/>
       </svg>
     ),
-    href: `${REPO}/download/Infinit-Code-Setup-${VERSION}.exe`,
+    href: `${BASE}/Infinit.Code-${VERSION}.Setup.exe`,
   },
   {
     id: 'linux' as OS,
     label: 'Download Linux',
-    sublabel: 'AppImage (x64)',
+    sublabel: 'Em breve',
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489.117.779.567 1.563 1.182 2.114.206.182.368.368.498.548.064-.078.128-.154.188-.23.468-.595.955-1.174 1.458-1.741-.367-.267-.697-.611-.983-1.027-.57-.832-.691-1.904-.39-2.918.302-1.013.969-1.937 1.73-2.705.766-.77 1.607-1.428 2.316-2.13.706-.704 1.281-1.456 1.542-2.34.26-.885.167-1.984-.398-3.14-.108-.223-.237-.424-.372-.611C9.96 1.36 11.245.53 12.504 0z"/>
       </svg>
     ),
-    href: `${REPO}/download/Infinit-Code-${VERSION}.AppImage`,
+    href: RELEASES,
   },
 ];
 

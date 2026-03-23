@@ -29,7 +29,7 @@ export async function createMachine(userId: string, options?: { githubToken?: st
       name: `ide-${userId.slice(0, 8)}-${Date.now()}`,
       region: 'gru',
       config: {
-        image: process.env.FLY_IMAGE_REF || `registry.fly.io/${FLY_APP_NAME}:deployment-01KMC1V0Y9W08TTWD8PF59KJ4T`,
+        image: process.env.FLY_IMAGE_REF || `registry.fly.io/${FLY_APP_NAME}:deployment-01KMC45VW42PZ48AWYJ0GS3HCD`,
         guest: {
           cpu_kind: 'shared',
           cpus: 1,

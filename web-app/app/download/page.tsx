@@ -303,6 +303,8 @@ export default function DownloadPage() {
                 <a
                   key={d.id}
                   href={d.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="dl-card"
                   style={{
                     display: 'flex', alignItems: 'center', gap: 16,

@@ -1,0 +1,11 @@
+{
+  "defaultModel": "claude-sonnet-4-6",
+  "planModel": "claude-opus-4-6",
+  "language": "pt-BR",
+  "autoCompact": true,
+  "compactThreshold": 0.5,
+  "voice": {
+    "language": "pt-BR",
+    "pushToTalk": "meta+k"
+  }
+}

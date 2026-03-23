@@ -14,10 +14,11 @@ interface TerminalPanelProps {
   onMachineChange?: (machine: MachineSession | null) => void;
   onCommandRef?: (sendCommand: (cmd: string) => void) => void;
   onStatusChange?: (connected: boolean) => void;
+  onOutputLine?: (line: string) => void;
   autoConnect?: boolean;
 }
 
-export function TerminalPanel({ onMachineChange, onCommandRef, onStatusChange, autoConnect }: TerminalPanelProps) {
+export function TerminalPanel({ onMachineChange, onCommandRef, onStatusChange, onOutputLine, autoConnect }: TerminalPanelProps) {
   const terminalRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const termRef = useRef<any>(null);
@@ -26,6 +27,7 @@ export function TerminalPanel({ onMachineChange, onCommandRef, onStatusChange, a
   const [machine, setMachine] = useState<MachineSession | null>(null);
   const [status, setStatus] = useState<'idle' | 'starting' | 'connected' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [authBanner, setAuthBanner] = useState<string | null>(null);
 
   // Expõe função para enviar comandos externamente (usado pelo GitPanel e RepoSelector)
   useEffect(() => {
@@ -122,11 +124,26 @@ export function TerminalPanel({ onMachineChange, onCommandRef, onStatusChange, a
         ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
       };
 
+      // Regex para detectar URLs de auth do Claude Code
+      const authUrlRegex = /https:\/\/(?:auth\.anthropic\.com|console\.anthropic\.com|claude\.ai\/?\S*auth)\S*/g;
+
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
           if (msg.type === 'output') {
             term.write(msg.data);
+
+            // Emite output line para o IntelliChat
+            if (onOutputLine) {
+              onOutputLine(msg.data);
+            }
+
+            // Detecta URLs de autenticação do Claude
+            const plainText = msg.data.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
+            const authMatch = plainText.match(authUrlRegex);
+            if (authMatch) {
+              setAuthBanner(authMatch[0]);
+            }
           } else if (msg.type === 'exit') {
             term.write('\r\n\x1b[33m[Sessão encerrada]\x1b[0m\r\n');
           }
@@ -177,7 +194,7 @@ export function TerminalPanel({ onMachineChange, onCommandRef, onStatusChange, a
       setStatus('error');
       setErrorMsg(err.message || 'Erro ao iniciar ambiente');
     }
-  }, [onMachineChange, onStatusChange]);
+  }, [onMachineChange, onStatusChange, onOutputLine]);
 
   // Auto-connect quando autoConnect=true
   const autoConnectDone = useRef(false);
@@ -331,6 +348,45 @@ export function TerminalPanel({ onMachineChange, onCommandRef, onStatusChange, a
       background: '#0a0a0a',
       borderTop: '1px solid #1c2340',
     }}>
+      {/* Auth banner */}
+      {authBanner && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '6px 14px',
+          background: 'rgba(91,108,249,.1)',
+          borderBottom: '1px solid rgba(91,108,249,.2)',
+          fontFamily: 'monospace',
+          fontSize: 11,
+        }}>
+          <span style={{ color: '#5B6CF9' }}>∞</span>
+          <a
+            href={authBanner}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => window.open(authBanner!, '_blank')}
+            style={{ color: '#5B6CF9', textDecoration: 'underline', cursor: 'pointer', flex: 1 }}
+          >
+            Autenticar Claude Code →
+          </a>
+          <button
+            onClick={() => setAuthBanner(null)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#5A6080',
+              cursor: 'pointer',
+              fontSize: 14,
+              padding: '0 4px',
+              fontFamily: 'monospace',
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       <div style={{
         display: 'flex',
         alignItems: 'center',

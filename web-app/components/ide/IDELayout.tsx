@@ -11,7 +11,7 @@ import { TerminalPanel } from './TerminalPanel';
 import { GitPanel } from './GitPanel';
 import { RepoSelector } from './RepoSelector';
 import { ClaudeCodeGuide } from './ClaudeCodeGuide';
-import { ChatPanel } from './ChatPanel';
+import { IntelliChat } from './IntelliChat';
 import type { MachineSession } from '@/lib/ide/machine-client';
 import { syncFromContainer, loadFileContent } from '@/lib/ide/file-client';
 
@@ -29,7 +29,7 @@ function useIsMobile() {
 }
 
 export function IDELayout() {
-  const { showPreview, showExplorer, showSnippets, setMachineConnected, syncFromContainer: storeSyncFromContainer } = useIDEStore();
+  const { showPreview, showExplorer, showSnippets, setMachineConnected, syncFromContainer: storeSyncFromContainer, openFiles, activeFileId } = useIDEStore();
   const [showTerminal, setShowTerminal] = useState(false);
   const [showChat, setShowChat] = useState(true);
   const [showGit, setShowGit] = useState(false);
@@ -43,6 +43,26 @@ export function IDELayout() {
   const terminalCommandRef = useRef<((cmd: string) => void) | null>(null);
   const pendingCommandsRef = useRef<{ command: string; env?: Record<string, string> } | null>(null);
 
+  // Terminal output state for IntelliChat
+  const [terminalLines, setTerminalLines] = useState<string[]>([]);
+  const outputSubscribersRef = useRef<Set<(line: string) => void>>(new Set());
+
+  const handleOutputLine = useCallback((line: string) => {
+    setTerminalLines(prev => {
+      const next = [...prev, line];
+      return next.length > 100 ? next.slice(-100) : next;
+    });
+    // Notify subscribers
+    outputSubscribersRef.current.forEach(cb => cb(line));
+  }, []);
+
+  const handleOutputSubscribe = useCallback((cb: (line: string) => void) => {
+    outputSubscribersRef.current.add(cb);
+    return () => { outputSubscribersRef.current.delete(cb); };
+  }, []);
+
+  const activeFile = openFiles.find(f => f.id === activeFileId) ?? null;
+
   const isMobile = useIsMobile();
   const [mobileTab, setMobileTab] = useState<MobileTab>('chat');
 
@@ -51,7 +71,7 @@ export function IDELayout() {
   // Auto-sync após clone: tenta sync com retry até encontrar arquivos
   const schedulePostCloneSync = useCallback(() => {
     let attempts = 0;
-    const maxAttempts = 6; // 6 tentativas × 5s = 30s total
+    const maxAttempts = 6;
     const trySync = async () => {
       attempts++;
       try {
@@ -90,7 +110,6 @@ export function IDELayout() {
         sendCmd(command);
       }
 
-      // Se era um clone command, agenda auto-sync
       if (command.includes('git clone')) {
         schedulePostCloneSync();
       }
@@ -114,7 +133,6 @@ export function IDELayout() {
       } else {
         terminalCommandRef.current(command);
       }
-      // Auto-sync após clone
       schedulePostCloneSync();
       return;
     }
@@ -136,7 +154,6 @@ export function IDELayout() {
     setMachineConnected(connected);
   }, [setMachineConnected]);
 
-  // Sync files do container → Monaco
   const handleSyncFiles = useCallback(async () => {
     if (!terminalConnected) return;
     setSyncing(true);
@@ -150,6 +167,18 @@ export function IDELayout() {
     }
   }, [terminalConnected, storeSyncFromContainer]);
 
+  // Terminal send for IntelliChat
+  const terminalSendCommand = useCallback((cmd: string) => {
+    if (terminalCommandRef.current) {
+      terminalCommandRef.current(cmd);
+    } else {
+      // Auto-start terminal if not running
+      setAutoConnect(true);
+      setShowTerminal(true);
+      pendingCommandsRef.current = { command: cmd };
+    }
+  }, []);
+
   // Mobile layout
   if (isMobile) {
     return (
@@ -160,7 +189,6 @@ export function IDELayout() {
         background: '#0a0a0a',
         overflow: 'hidden',
       }}>
-        {/* Mobile header compacto */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -189,15 +217,14 @@ export function IDELayout() {
           >Clone</button>
         </div>
 
-        {/* Conteúdo principal — 1 painel por vez */}
         <div style={{ flex: 1, overflow: 'hidden' }}>
           {mobileTab === 'chat' && (
-            <ChatPanel
+            <IntelliChat
+              terminalSendCommand={terminalSendCommand}
+              terminalOutput={terminalLines.join('\n')}
+              onOutputSubscribe={handleOutputSubscribe}
+              activeFile={activeFile}
               machine={machine}
-              onStartTerminal={handleStartTerminal}
-              sendCommand={handleRunCommand}
-              onOpenRepos={() => setShowRepoSelector(true)}
-              onSyncFiles={handleSyncFiles}
             />
           )}
           {mobileTab === 'editor' && <EditorPanel />}
@@ -213,12 +240,12 @@ export function IDELayout() {
               onMachineChange={setMachine}
               onCommandRef={ref => { terminalCommandRef.current = ref; }}
               onStatusChange={handleTerminalStatusChange}
+              onOutputLine={handleOutputLine}
               autoConnect={autoConnect}
             />
           )}
         </div>
 
-        {/* Bottom navigation */}
         <div style={{
           display: 'flex',
           background: '#0f1428',
@@ -282,7 +309,7 @@ export function IDELayout() {
     );
   }
 
-  // Desktop layout (original)
+  // Desktop layout
   return (
     <div style={{
       display: 'flex',
@@ -333,6 +360,7 @@ export function IDELayout() {
                 onMachineChange={setMachine}
                 onCommandRef={ref => { terminalCommandRef.current = ref; }}
                 onStatusChange={handleTerminalStatusChange}
+                onOutputLine={handleOutputLine}
                 autoConnect={autoConnect}
               />
             </div>
@@ -340,13 +368,13 @@ export function IDELayout() {
         </div>
 
         {showChat && (
-          <div style={{ width: 420, flexShrink: 0, overflow: 'hidden', borderLeft: '1px solid #1c2340' }}>
-            <ChatPanel
+          <div style={{ width: 360, flexShrink: 0, overflow: 'hidden', borderLeft: '1px solid #1c2340' }}>
+            <IntelliChat
+              terminalSendCommand={terminalSendCommand}
+              terminalOutput={terminalLines.join('\n')}
+              onOutputSubscribe={handleOutputSubscribe}
+              activeFile={activeFile}
               machine={machine}
-              onStartTerminal={handleStartTerminal}
-              sendCommand={handleRunCommand}
-              onOpenRepos={() => setShowRepoSelector(true)}
-              onSyncFiles={handleSyncFiles}
             />
           </div>
         )}

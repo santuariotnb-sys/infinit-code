@@ -22,7 +22,7 @@ async function flyFetch(path: string, options: RequestInit = {}): Promise<Respon
   });
 }
 
-export async function createMachine(userId: string): Promise<FlyMachine> {
+export async function createMachine(userId: string, options?: { githubToken?: string }): Promise<FlyMachine> {
   const res = await flyFetch('/machines', {
     method: 'POST',
     body: JSON.stringify({
@@ -52,6 +52,9 @@ export async function createMachine(userId: string): Promise<FlyMachine> {
             internal_port: 3000,
           },
         ],
+        env: {
+          ...(options?.githubToken ? { GITHUB_TOKEN: options.githubToken } : {}),
+        },
         auto_destroy: true,
         restart: { policy: 'no' },
         metadata: {

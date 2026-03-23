@@ -101,8 +101,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Busca GitHub token do cookie para injetar no container
+    const githubToken = req.cookies.get('github_token')?.value;
+
     // Cria machine no Fly.io
-    const machine = await createMachine(user.id);
+    const machine = await createMachine(user.id, { githubToken: githubToken || undefined });
 
     // Aguarda machine ficar pronta
     const ready = await waitForMachine(machine.id, 'started', 60000);

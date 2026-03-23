@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
   const sanitize = (s: string) => s.replace(/[^a-zA-Z0-9@._\- ]/g, '');
   const safeEmail = sanitize(session.user.email || '');
   const safeName = sanitize(session.user.name || 'Infinit Code User');
-  const cloneCommand = `cd /home/coder/project && git -c credential.helper='!f() { echo "password=\${GH_TOKEN}"; echo "username=x-access-token"; }; f' clone https://github.com/${repo}.git ${repoName} && cd ${repoName} && git config user.email "${safeEmail}" && git config user.name "${safeName}" && echo "\\n✓ Repo clonado com sucesso!"`;
+  const cloneCommand = `git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=\${GH_TOKEN}"; }; f' && cd /root/workspace && git clone https://github.com/${repo}.git ${repoName} && cd ${repoName} && git config user.email "${safeEmail}" && git config user.name "${safeName}" && echo "\\n✓ Repo clonado com sucesso em /root/workspace/${repoName}"`;
 
   return NextResponse.json({
     command: cloneCommand,

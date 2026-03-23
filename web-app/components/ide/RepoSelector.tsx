@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { fetchRepos, cloneRepo, type GitHubRepo } from '@/lib/ide/github-client';
-import type { MachineSession } from '@/lib/ide/machine-client';
+import { getMachine, createMachine, type MachineSession } from '@/lib/ide/machine-client';
 
 interface RepoSelectorProps {
   machine: MachineSession | null;
-  onClone: (command: string) => void;
+  onClone: (command: string, env?: Record<string, string>) => void;
   onClose: () => void;
+  onStartTerminal?: () => void;
+  onMachineReady?: (machine: MachineSession) => void;
 }
 
 const langColors: Record<string, string> = {
@@ -21,13 +23,16 @@ const langColors: Record<string, string> = {
   Java: '#b07219',
 };
 
-export function RepoSelector({ machine, onClone, onClose }: RepoSelectorProps) {
+export function RepoSelector({ machine: machineProp, onClone, onClose, onStartTerminal, onMachineReady }: RepoSelectorProps) {
   const [repos, setRepos] = useState<GitHubRepo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [cloning, setCloning] = useState<string | null>(null);
+  const [machine, setMachine] = useState<MachineSession | null>(machineProp);
+  const [creatingMachine, setCreatingMachine] = useState(false);
 
+  // Busca repos
   useEffect(() => {
     fetchRepos()
       .then(setRepos)
@@ -35,12 +40,55 @@ export function RepoSelector({ machine, onClone, onClose }: RepoSelectorProps) {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleClone = async (repo: GitHubRepo) => {
-    if (!machine) return;
-    setCloning(repo.fullName);
+  // Se não tem machine do prop, busca da API
+  useEffect(() => {
+    if (machineProp) {
+      setMachine(machineProp);
+      return;
+    }
+    getMachine().then(m => {
+      if (m) setMachine(m);
+    }).catch(() => {});
+  }, [machineProp]);
+
+  const ensureMachine = async (): Promise<MachineSession | null> => {
+    if (machine) return machine;
+
+    setCreatingMachine(true);
+    setError('');
     try {
-      const { command } = await cloneRepo(repo.fullName, machine.id);
-      onClone(command);
+      // Tenta buscar machine existente
+      let m = await getMachine();
+      if (!m) {
+        m = await createMachine();
+      }
+      setMachine(m);
+      onMachineReady?.(m);
+      // Abre o terminal para a conexão WebSocket
+      onStartTerminal?.();
+      return m;
+    } catch (err: any) {
+      setError(`Erro ao criar ambiente: ${err.message}`);
+      return null;
+    } finally {
+      setCreatingMachine(false);
+    }
+  };
+
+  const handleClone = async (repo: GitHubRepo) => {
+    setCloning(repo.fullName);
+    setError('');
+
+    try {
+      // Garante que tem machine rodando
+      const m = await ensureMachine();
+      if (!m) {
+        setCloning(null);
+        return;
+      }
+
+      const { command, env } = await cloneRepo(repo.fullName, m.id);
+      onClone(command, env);
       onClose();
     } catch (err: any) {
       setError(err.message);
@@ -72,8 +120,9 @@ export function RepoSelector({ machine, onClone, onClose }: RepoSelectorProps) {
           background: '#0b0f1e',
           border: '1px solid #1c2340',
           borderRadius: 12,
-          width: 520,
-          maxHeight: '70vh',
+          width: '95vw',
+          maxWidth: 520,
+          maxHeight: '80vh',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -142,11 +191,11 @@ export function RepoSelector({ machine, onClone, onClose }: RepoSelectorProps) {
                 alignItems: 'center',
                 padding: '10px 20px',
                 gap: 12,
-                cursor: 'pointer',
+                cursor: cloning ? 'default' : 'pointer',
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#131829')}
+              onMouseEnter={e => { if (!cloning) e.currentTarget.style.background = '#131829'; }}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-              onClick={() => handleClone(repo)}
+              onClick={() => { if (!cloning) handleClone(repo); }}
             >
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -182,7 +231,7 @@ export function RepoSelector({ machine, onClone, onClose }: RepoSelectorProps) {
                 </div>
               </div>
               <button
-                disabled={cloning === repo.fullName}
+                disabled={!!cloning}
                 style={{
                   background: cloning === repo.fullName ? '#1c2340' : '#00ff88',
                   color: cloning === repo.fullName ? '#5A6080' : '#000',
@@ -191,28 +240,18 @@ export function RepoSelector({ machine, onClone, onClose }: RepoSelectorProps) {
                   padding: '6px 14px',
                   fontSize: 11,
                   fontWeight: 700,
-                  cursor: cloning === repo.fullName ? 'default' : 'pointer',
+                  cursor: cloning ? 'default' : 'pointer',
                   fontFamily: 'monospace',
                   whiteSpace: 'nowrap',
                 }}
               >
-                {cloning === repo.fullName ? 'Clonando...' : 'Clone →'}
+                {cloning === repo.fullName
+                  ? (creatingMachine ? 'Criando ambiente...' : 'Clonando...')
+                  : 'Clone →'}
               </button>
             </div>
           ))}
         </div>
-
-        {!machine && (
-          <div style={{
-            padding: '12px 20px',
-            borderTop: '1px solid #1c2340',
-            fontSize: 11,
-            color: '#e74c3c',
-            textAlign: 'center',
-          }}>
-            Inicie o terminal primeiro para clonar um repositório
-          </div>
-        )}
       </div>
     </div>
   );

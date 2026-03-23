@@ -93,12 +93,13 @@ function DashboardContent() {
           background: isPro ? 'rgba(0,255,136,.04)' : '#111',
           border: `1px solid ${isPro ? 'rgba(0,255,136,.15)' : '#1a1a1a'}`,
           borderRadius: 12,
-          padding: '32px',
+          padding: 'clamp(16px, 4vw, 32px)',
           marginBottom: 24,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 24,
+          gap: 16,
+          flexWrap: 'wrap',
         }}>
           <div>
             <h2 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 6px' }}>
@@ -131,7 +132,7 @@ function DashboardContent() {
         </section>
 
         {/* Status cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 32 }}>
           <StatusCard
             label="Plano"
             value={isPro ? 'Pro' : 'Free'}
@@ -152,7 +153,7 @@ function DashboardContent() {
         </div>
 
         {/* Quick actions */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 32 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12, marginBottom: 32 }}>
           <ActionCard
             icon=">_"
             title="Terminal Cloud"
@@ -174,7 +175,7 @@ function DashboardContent() {
           <div style={{ fontSize: 11, color: '#555', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 16 }}>
             Incluído no {isPro ? 'seu plano' : 'Pro'}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10 }}>
             {[
               { icon: '{ }', title: 'Monaco Editor', desc: 'Syntax highlighting, autocomplete, multi-cursor', color: '#5B6CF9' },
               { icon: '∞', title: 'Claude Code', desc: '4 skills pré-instaladas no terminal', color: '#00ff88' },

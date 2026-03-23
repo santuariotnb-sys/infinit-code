@@ -25,10 +25,10 @@ export default function LoginPage() {
         background: '#111',
         border: '1px solid #1a1a1a',
         borderRadius: 12,
-        padding: '48px 48px 40px',
+        padding: 'clamp(32px, 6vw, 48px) clamp(24px, 5vw, 48px) 40px',
         textAlign: 'center',
         maxWidth: 380,
-        width: '100%',
+        width: 'calc(100% - 32px)',
       }}>
         <div style={{ fontSize: 40, marginBottom: 12, color: '#00ff88' }}>∞</div>
         <h1 style={{ fontSize: 22, color: '#e8e8e8', margin: '0 0 6px', fontWeight: 700 }}>Infinit Code</h1>

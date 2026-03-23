@@ -23,7 +23,7 @@ export async function fetchRepos(page: number = 1): Promise<GitHubRepo[]> {
 export async function cloneRepo(
   repo: string,
   machineSessionId: string
-): Promise<{ command: string; repoName: string }> {
+): Promise<{ command: string; env?: Record<string, string>; repoName: string }> {
   const res = await fetch('/api/ide/github/clone', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

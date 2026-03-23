@@ -29,7 +29,7 @@ export async function createMachine(userId: string): Promise<FlyMachine> {
       name: `ide-${userId.slice(0, 8)}-${Date.now()}`,
       region: 'gru',
       config: {
-        image: process.env.FLY_IMAGE_REF || `registry.fly.io/${FLY_APP_NAME}:deployment-01KMB1JDGBATC4BBHZZJX9B9Q5`,
+        image: process.env.FLY_IMAGE_REF || `registry.fly.io/${FLY_APP_NAME}:deployment-01KMC1V0Y9W08TTWD8PF59KJ4T`,
         guest: {
           cpu_kind: 'shared',
           cpus: 1,
@@ -37,9 +37,19 @@ export async function createMachine(userId: string): Promise<FlyMachine> {
         },
         services: [
           {
-            ports: [{ port: 8080 }],
+            ports: [{ port: 8080, handlers: ['tls', 'http'] }, { port: 80, handlers: ['http'] }],
             protocol: 'tcp',
             internal_port: 8080,
+          },
+          {
+            ports: [{ port: 9090, handlers: ['tls', 'http'] }],
+            protocol: 'tcp',
+            internal_port: 9090,
+          },
+          {
+            ports: [{ port: 3000, handlers: ['tls', 'http'] }],
+            protocol: 'tcp',
+            internal_port: 3000,
           },
         ],
         auto_destroy: true,

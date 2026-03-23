@@ -1,4 +1,6 @@
 // app/api/dashboard/route.ts
+// Inclui githubConnected para unificar o estado no dashboard
+
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -17,12 +19,17 @@ export async function GET() {
 
   const { data: user } = await supabase
     .from('users')
-    .select('id')
+    .select('id, github_connected, github_username')
     .eq('email', session.user.email)
     .single();
 
   if (!user) {
-    return NextResponse.json({ license: null, subscription: null });
+    return NextResponse.json({
+      license: null,
+      subscription: null,
+      githubConnected: false,
+      githubUsername: null,
+    });
   }
 
   const [{ data: license }, { data: subscription }] = await Promise.all([
@@ -50,5 +57,7 @@ export async function GET() {
       status: subscription.status,
       currentPeriodEnd: subscription.current_period_end,
     } : null,
+    githubConnected: user.github_connected ?? false,
+    githubUsername: user.github_username ?? null,
   });
 }

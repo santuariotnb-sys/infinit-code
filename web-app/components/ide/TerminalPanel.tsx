@@ -13,9 +13,11 @@ import {
 interface TerminalPanelProps {
   onMachineChange?: (machine: MachineSession | null) => void;
   onCommandRef?: (sendCommand: (cmd: string) => void) => void;
+  onStatusChange?: (connected: boolean) => void;
+  autoConnect?: boolean;
 }
 
-export function TerminalPanel({ onMachineChange, onCommandRef }: TerminalPanelProps) {
+export function TerminalPanel({ onMachineChange, onCommandRef, onStatusChange, autoConnect }: TerminalPanelProps) {
   const terminalRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const termRef = useRef<any>(null);
@@ -40,8 +42,16 @@ export function TerminalPanel({ onMachineChange, onCommandRef }: TerminalPanelPr
     setStatus('starting');
     setErrorMsg('');
 
+    // Limpa estado anterior
+    if (wsRef.current) { wsRef.current.close(); wsRef.current = null; }
+    if (termRef.current) { termRef.current.dispose(); termRef.current = null; }
+    if (heartbeatRef.current) { clearInterval(heartbeatRef.current); heartbeatRef.current = undefined; }
+    if (resizeCleanupRef.current) { resizeCleanupRef.current(); resizeCleanupRef.current = null; }
+    setMachine(null);
+    onMachineChange?.(null);
+
     try {
-      // Busca ou cria machine
+      // Busca ou cria machine (API verifica estado real no Fly.io)
       let m = await getMachine();
       if (!m) {
         m = await createMachine();
@@ -107,6 +117,7 @@ export function TerminalPanel({ onMachineChange, onCommandRef }: TerminalPanelPr
 
       ws.onopen = () => {
         setStatus('connected');
+        onStatusChange?.(true);
         // Envia resize inicial
         ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
       };
@@ -124,12 +135,14 @@ export function TerminalPanel({ onMachineChange, onCommandRef }: TerminalPanelPr
 
       ws.onclose = () => {
         setStatus('idle');
+        onStatusChange?.(false);
         term.write('\r\n\x1b[31m[Desconectado]\x1b[0m\r\n');
       };
 
       ws.onerror = () => {
         setStatus('error');
-        setErrorMsg('Falha na conexão WebSocket');
+        onStatusChange?.(false);
+        setErrorMsg('Falha na conexão WebSocket. Clique "Tentar novamente" para reconectar.');
       };
 
       // Terminal → WebSocket
@@ -164,7 +177,16 @@ export function TerminalPanel({ onMachineChange, onCommandRef }: TerminalPanelPr
       setStatus('error');
       setErrorMsg(err.message || 'Erro ao iniciar ambiente');
     }
-  }, [onMachineChange]);
+  }, [onMachineChange, onStatusChange]);
+
+  // Auto-connect quando autoConnect=true
+  const autoConnectDone = useRef(false);
+  useEffect(() => {
+    if (autoConnect && !autoConnectDone.current && status === 'idle') {
+      autoConnectDone.current = true;
+      connect();
+    }
+  }, [autoConnect, status, connect]);
 
   const disconnect = useCallback(async () => {
     if (wsRef.current) {
@@ -188,8 +210,9 @@ export function TerminalPanel({ onMachineChange, onCommandRef }: TerminalPanelPr
     }
     setMachine(null);
     onMachineChange?.(null);
+    onStatusChange?.(false);
     setStatus('idle');
-  }, [machine, onMachineChange]);
+  }, [machine, onMachineChange, onStatusChange]);
 
   // Cleanup on unmount
   useEffect(() => {

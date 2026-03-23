@@ -4,6 +4,8 @@ export interface FileNode {
   type: 'file' | 'folder';
   children?: FileNode[];
   content?: string;
+  /** Caminho relativo ao workspace do container (ex: "src/App.tsx") */
+  path?: string;
 }
 
 export type PreviewMode = 'html' | 'react' | 'none';

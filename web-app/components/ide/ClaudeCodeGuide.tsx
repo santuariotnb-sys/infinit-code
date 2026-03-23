@@ -56,8 +56,9 @@ export function ClaudeCodeGuide({ onClose, onRunCommand }: ClaudeCodeGuideProps)
           background: '#0b0f1e',
           border: '1px solid #1c2340',
           borderRadius: 12,
-          width: 440,
-          padding: '28px 32px',
+          width: '95vw',
+          maxWidth: 440,
+          padding: '24px clamp(16px, 4vw, 32px)',
         }}
       >
         {/* Header */}

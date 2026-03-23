@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createClient } from '@supabase/supabase-js';
-import { createMachine, waitForMachine } from '@/lib/ide/fly-machines';
+import { createMachine, waitForMachine, getMachine as getFlyMachine } from '@/lib/ide/fly-machines';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_KEY!
 );
 
-// GET — retorna a machine ativa do user
+// GET — retorna a machine ativa do user (verifica estado real no Fly.io)
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
@@ -33,7 +33,31 @@ export async function GET() {
     .eq('status', 'running')
     .single();
 
-  return NextResponse.json({ machine: machineSession || null });
+  if (!machineSession) {
+    return NextResponse.json({ machine: null });
+  }
+
+  // Verifica estado real no Fly.io — container pode ter morrido
+  try {
+    const flyMachine = await getFlyMachine(machineSession.fly_machine_id);
+    if (flyMachine.state !== 'started' && flyMachine.state !== 'starting') {
+      // Container morreu — limpa sessão stale
+      await supabase
+        .from('machine_sessions')
+        .update({ status: 'stopped' })
+        .eq('id', machineSession.id);
+      return NextResponse.json({ machine: null });
+    }
+  } catch {
+    // Machine não existe mais no Fly — limpa sessão
+    await supabase
+      .from('machine_sessions')
+      .update({ status: 'stopped' })
+      .eq('id', machineSession.id);
+    return NextResponse.json({ machine: null });
+  }
+
+  return NextResponse.json({ machine: machineSession });
 }
 
 // POST — cria uma nova machine
@@ -62,7 +86,18 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (existing) {
-    return NextResponse.json({ machine: existing });
+    // Verifica se a machine ainda está viva no Fly.io
+    try {
+      const flyMachine = await getFlyMachine(existing.fly_machine_id);
+      if (flyMachine.state === 'started' || flyMachine.state === 'starting') {
+        return NextResponse.json({ machine: existing });
+      }
+    } catch {}
+    // Machine morta — limpa sessão stale
+    await supabase
+      .from('machine_sessions')
+      .update({ status: 'stopped' })
+      .eq('id', existing.id);
   }
 
   try {
@@ -72,20 +107,16 @@ export async function POST(req: NextRequest) {
     // Aguarda machine ficar pronta
     const ready = await waitForMachine(machine.id, 'started', 60000);
 
-    // Salva no Supabase usando upsert para evitar race condition
-    // (dois requests simultâneos poderiam criar machines duplicadas)
+    // Salva no Supabase
     const { data: machineSession, error } = await supabase
       .from('machine_sessions')
-      .upsert(
-        {
-          user_id: user.id,
-          fly_machine_id: machine.id,
-          fly_region: ready.region,
-          status: 'running',
-          private_ip: ready.private_ip,
-        },
-        { onConflict: 'user_id,status' }
-      )
+      .insert({
+        user_id: user.id,
+        fly_machine_id: machine.id,
+        fly_region: ready.region,
+        status: 'running',
+        private_ip: ready.private_ip,
+      })
       .select()
       .single();
 

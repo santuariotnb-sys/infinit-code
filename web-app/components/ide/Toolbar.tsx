@@ -9,14 +9,18 @@ import type { MachineSession } from '@/lib/ide/machine-client';
 interface ToolbarProps {
   onToggleTerminal?: () => void;
   showTerminal?: boolean;
+  onToggleChat?: () => void;
+  showChat?: boolean;
   onToggleGit?: () => void;
   showGit?: boolean;
   onOpenRepos?: () => void;
   onOpenClaudeGuide?: () => void;
   machine?: MachineSession | null;
+  onSyncFiles?: () => void;
+  syncing?: boolean;
 }
 
-export function Toolbar({ onToggleTerminal, showTerminal, onToggleGit, showGit, onOpenRepos, onOpenClaudeGuide, machine }: ToolbarProps) {
+export function Toolbar({ onToggleTerminal, showTerminal, onToggleChat, showChat, onToggleGit, showGit, onOpenRepos, onOpenClaudeGuide, machine, onSyncFiles, syncing }: ToolbarProps) {
   const { data: session } = useSession();
   const { showPreview, showSnippets, showExplorer, togglePreview, toggleSnippets, toggleExplorer, projectName } = useIDEStore();
   const [githubConnected, setGithubConnected] = useState(false);
@@ -48,12 +52,38 @@ export function Toolbar({ onToggleTerminal, showTerminal, onToggleGit, showGit, 
 
       <ToggleBtn active={showExplorer} onClick={toggleExplorer} label="Arquivos" />
       <ToggleBtn active={showPreview} onClick={togglePreview} label="Preview" />
-      <ToggleBtn active={showSnippets} onClick={toggleSnippets} label="Snippets" />
+      {onToggleChat && (
+        <ToggleBtn active={!!showChat} onClick={onToggleChat} label="∞ Chat" accent />
+      )}
       {onToggleTerminal && (
         <ToggleBtn active={!!showTerminal} onClick={onToggleTerminal} label="Terminal" />
       )}
+      <ToggleBtn active={showSnippets} onClick={toggleSnippets} label="Snippets" />
       {onToggleGit && (
         <ToggleBtn active={!!showGit} onClick={onToggleGit} label="Git" />
+      )}
+
+      {onSyncFiles && machine && (
+        <button
+          onClick={onSyncFiles}
+          disabled={syncing}
+          title="Sincronizar arquivos do container"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            background: syncing ? '#0f1428' : '#1c2340',
+            border: '1px solid #1c2340',
+            borderRadius: 4,
+            color: syncing ? '#5A6080' : '#3EEDB0',
+            fontSize: 11,
+            padding: '3px 10px',
+            cursor: syncing ? 'default' : 'pointer',
+            fontFamily: 'monospace',
+          }}
+        >
+          {syncing ? '⟳ Syncing...' : '↻ Sync'}
+        </button>
       )}
 
       <div style={{ width: 1, height: 20, background: '#1c2340', margin: '0 2px' }} />
@@ -61,19 +91,18 @@ export function Toolbar({ onToggleTerminal, showTerminal, onToggleGit, showGit, 
       {githubConnected && onOpenRepos && (
         <button
           onClick={onOpenRepos}
-          disabled={!machine}
-          title={machine ? 'Clonar repositório' : 'Inicie o terminal primeiro'}
+          title="Clonar repositório"
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 4,
-            background: machine ? '#1c2340' : 'transparent',
+            background: '#1c2340',
             border: '1px solid #1c2340',
             borderRadius: 4,
-            color: machine ? '#AEB6D8' : '#3a4060',
+            color: '#AEB6D8',
             fontSize: 11,
             padding: '3px 10px',
-            cursor: machine ? 'pointer' : 'default',
+            cursor: 'pointer',
             fontFamily: 'monospace',
           }}
         >
@@ -85,29 +114,6 @@ export function Toolbar({ onToggleTerminal, showTerminal, onToggleGit, showGit, 
       )}
 
       <GitHubConnect />
-
-      {onOpenClaudeGuide && (
-        <button
-          onClick={onOpenClaudeGuide}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 5,
-            background: 'rgba(91,108,249,.1)',
-            border: '1px solid rgba(91,108,249,.2)',
-            borderRadius: 4,
-            color: '#5B6CF9',
-            fontSize: 11,
-            padding: '3px 10px',
-            cursor: 'pointer',
-            fontFamily: 'monospace',
-            fontWeight: 700,
-          }}
-        >
-          <span style={{ fontSize: 14 }}>∞</span>
-          Claude Code
-        </button>
-      )}
 
       <div style={{ width: 1, height: 20, background: '#1c2340', margin: '0 2px' }} />
 
@@ -131,19 +137,21 @@ export function Toolbar({ onToggleTerminal, showTerminal, onToggleGit, showGit, 
   );
 }
 
-function ToggleBtn({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+function ToggleBtn({ active, onClick, label, accent }: { active: boolean; onClick: () => void; label: string; accent?: boolean }) {
+  const activeColor = accent ? '#00ff88' : '#00ff88';
   return (
     <button
       onClick={onClick}
       style={{
-        background: active ? 'rgba(0,255,136,.1)' : 'transparent',
+        background: active ? (accent ? 'rgba(0,255,136,.15)' : 'rgba(0,255,136,.1)') : 'transparent',
         border: `1px solid ${active ? 'rgba(0,255,136,.2)' : '#1c2340'}`,
         borderRadius: 4,
-        color: active ? '#00ff88' : '#5A6080',
+        color: active ? activeColor : '#5A6080',
         fontSize: 11,
         padding: '3px 10px',
         cursor: 'pointer',
         fontFamily: 'monospace',
+        fontWeight: accent ? 700 : 400,
       }}
     >
       {label}

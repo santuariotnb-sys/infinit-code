@@ -1,0 +1,66 @@
+# ============================================================
+#  Infinit Code — Fly.io Machines App
+#  Containers sob demanda por usuário
+# ============================================================
+
+app = "infinitcode-machines"
+primary_region = "gru"
+
+[build]
+  dockerfile = "Dockerfile"
+
+# Não tem processo permanente — as machines são criadas
+# dinamicamente via API pelo Next.js
+# Este toml é usado apenas para build e push da imagem
+
+[env]
+  FLY_REGION = "gru"
+  NODE_ENV = "production"
+
+# Secrets configurados via: fly secrets set
+# IDE_JWT_SECRET=...
+# ANTHROPIC_API_KEY=...
+
+# ── ttyd (terminal WebSocket) ──
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+
+  [[services.ports]]
+    port = 8080
+    handlers = ["tls", "http"]
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+# ── File server API ──
+[[services]]
+  protocol = "tcp"
+  internal_port = 9090
+
+  [[services.ports]]
+    port = 9090
+    handlers = ["tls", "http"]
+
+# ── Dev server preview (iniciado pelo usuário) ──
+[[services]]
+  protocol = "tcp"
+  internal_port = 3000
+
+  [[services.ports]]
+    port = 3000
+    handlers = ["tls", "http"]
+
+[checks]
+  [checks.ttyd]
+    type = "tcp"
+    interval = "15s"
+    timeout = "2s"
+    port = 8080
+
+  [checks.fileserver]
+    type = "tcp"
+    interval = "15s"
+    timeout = "2s"
+    port = 9090

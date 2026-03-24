@@ -77,9 +77,9 @@ const TABS: { id: TabOS; label: string }[] = [
 
 const STEPS: Record<TabOS, { num: string; green?: boolean; title: string; desc: string; code?: string }[]> = {
   mac: [
-    { num: '01', green: true, title: 'Baixar o .dmg', desc: 'Clique em "Baixar para Mac" acima. Escolha arm64 para Apple Silicon (M1/M2/M3) ou x64 para Intel.' },
-    { num: '02', title: 'Abrir e instalar', desc: 'Abre o arquivo .dmg. Arrasta o Infinit Code para a pasta Applications. Ejecta o disco.' },
-    { num: '03', title: 'Primeira abertura — aviso do macOS', desc: 'Se aparecer "está danificado" ou "desenvolvedor não identificado": isso é normal em apps sem assinatura Apple. Abra o Terminal e rode o comando abaixo. Depois abra o app normalmente.', code: 'sudo xattr -rd com.apple.quarantine "/Applications/Infinit Code.app"' },
+    { num: '01', green: true, title: 'Baixar o .dmg', desc: 'Clique em "Baixar para Mac" acima. Escolha arm64 para Apple Silicon (M1/M2/M3/M4) ou x64 para Intel.' },
+    { num: '02', title: 'Apple Silicon (M1/M2/M3/M4) — instalar via Terminal', desc: 'Abra o Terminal (Launchpad → Terminal) e cole o comando abaixo. Ele remove o bloqueio do macOS, instala o app e abre automaticamente.', code: `xattr -rd com.apple.quarantine ~/Downloads/Infinit.Code-${VERSION}-arm64.dmg\nhdiutil attach ~/Downloads/Infinit.Code-${VERSION}-arm64.dmg\nsudo cp -R "/Volumes/Infinit Code/Infinit Code.app" /Applications/\nsudo xattr -rd com.apple.quarantine "/Applications/Infinit Code.app"\nopen "/Applications/Infinit Code.app"` },
+    { num: '03', title: 'Mac Intel (x64) — instalar via Terminal', desc: 'Se você baixou a versão x64, use este comando:', code: `xattr -rd com.apple.quarantine ~/Downloads/Infinit.Code-${VERSION}-x64.dmg\nhdiutil attach ~/Downloads/Infinit.Code-${VERSION}-x64.dmg\nsudo cp -R "/Volumes/Infinit Code/Infinit Code.app" /Applications/\nsudo xattr -rd com.apple.quarantine "/Applications/Infinit Code.app"\nopen "/Applications/Infinit Code.app"` },
     { num: '04', title: 'Setup automático', desc: 'O app detecta e instala automaticamente: Node.js LTS, Git, Claude Code CLI e as Skills necessárias. Só aguardar a barra de progresso.' },
     { num: '05', green: true, title: 'Ativar a licença', desc: 'Cole a chave INFT-XXXX que chegou por email. Clique em "Ativar e entrar". Pronto — IDE abre em seguida.' },
   ],
@@ -410,10 +410,17 @@ export default function DownloadPage() {
                     <div style={{ fontSize: 14, fontWeight: 500, color: '#1a1c20', marginBottom: 4 }}>{step.title}</div>
                     {step.desc && <div style={{ fontSize: 13, color: '#8a8d96', lineHeight: 1.55, fontWeight: 300 }}>{step.desc}</div>}
                     {step.code && (
-                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: '#4a4d55', background: 'rgba(255,255,255,0.6)', borderRadius: 7, padding: '8px 12px', marginTop: 8, display: 'inline-block', boxShadow: '0 1px 0 rgba(255,255,255,0.9) inset' }}>
-                        {step.code.split(' ')[0] === 'sudo' || step.code.startsWith('chmod') || step.code.startsWith('./') ? (
-                          <><span style={{ color: '#3CB043' }}>{step.code.split(' ')[0]}</span>{' ' + step.code.split(' ').slice(1).join(' ')}</>
-                        ) : step.code}
+                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: '#4a4d55', background: 'rgba(255,255,255,0.6)', borderRadius: 7, padding: '10px 14px', marginTop: 8, display: 'block', boxShadow: '0 1px 0 rgba(255,255,255,0.9) inset', overflowX: 'auto' }}>
+                        {step.code.split('\n').map((line, i) => {
+                          const cmd = line.split(' ')[0];
+                          const rest = ' ' + line.split(' ').slice(1).join(' ');
+                          const highlight = ['sudo','xattr','hdiutil','chmod','open','./'].some(k => cmd === k || line.startsWith(k));
+                          return (
+                            <div key={i} style={{ whiteSpace: 'pre', lineHeight: 1.8 }}>
+                              {highlight ? <><span style={{ color: '#3CB043' }}>{cmd}</span>{rest}</> : line}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

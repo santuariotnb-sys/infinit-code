@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 const NOISE = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E")`;
 
+const VERSION = '1.1.0';
 const REPO = 'https://github.com/santuariotnb-sys/infinit-code-desktop';
 const RELEASES = `${REPO}/releases/latest`;
 const DL = (file: string) => `${REPO}/releases/latest/download/${file}`;
@@ -14,7 +15,7 @@ const DOWNLOADS = [
     os: 'mac',
     label: 'macOS',
     sub: 'Apple Silicon — M1, M2, M3, M4',
-    url: DL('Infinit.Code-1.1.0-arm64.dmg'),
+    url: DL(`Infinit.Code-${VERSION}-arm64.dmg`),
     icon: (
       <svg width="22" height="28" viewBox="0 0 814 1000" fill="currentColor">
         <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 376.8 0 229.9 0 217.3c0-7.1 0-14.3.6-21.4 6.5-84.1 75-126.5 138.3-126.5 51.2 0 93.5 34.6 125.4 34.6 30.5 0 78.4-36.8 138.9-36.8 19.2 0 108.2 1.9 163.7 88.1zm-88.4-184.3c16.6-21.4 28.2-51.2 28.2-80.4 0-4.5-.6-9-.6-12.9C673 67.9 625.7 100 597.5 133c-16 18.6-28.9 48.9-28.9 78.1 0 4.5.6 9.7 1.3 12.9 1.9 0 5.2.6 8.5.6 27 0 70.6-18 120.3-68.0z"/>
@@ -26,7 +27,7 @@ const DOWNLOADS = [
     os: 'mac',
     label: 'macOS',
     sub: 'Intel — Core i5, i7, i9',
-    url: DL('Infinit.Code-1.1.0-x64.dmg'),
+    url: DL(`Infinit.Code-${VERSION}-x64.dmg`),
     icon: (
       <svg width="22" height="28" viewBox="0 0 814 1000" fill="currentColor">
         <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 376.8 0 229.9 0 217.3c0-7.1 0-14.3.6-21.4 6.5-84.1 75-126.5 138.3-126.5 51.2 0 93.5 34.6 125.4 34.6 30.5 0 78.4-36.8 138.9-36.8 19.2 0 108.2 1.9 163.7 88.1zm-88.4-184.3c16.6-21.4 28.2-51.2 28.2-80.4 0-4.5-.6-9-.6-12.9C673 67.9 625.7 100 597.5 133c-16 18.6-28.9 48.9-28.9 78.1 0 4.5.6 9.7 1.3 12.9 1.9 0 5.2.6 8.5.6 27 0 70.6-18 120.3-68.0z"/>
@@ -38,7 +39,7 @@ const DOWNLOADS = [
     os: 'win',
     label: 'Windows',
     sub: 'Windows 10 e 11 — 64-bit',
-    url: DL('Infinit.Code-1.1.0.Setup.exe'),
+    url: DL(`Infinit.Code-${VERSION}.Setup.exe`),
     icon: (
       <svg width="26" height="26" viewBox="0 0 88 88" fill="currentColor">
         <path d="M0 12.402l35.687-4.86.016 34.423-35.67.203zm35.67 33.529l.028 34.453L.028 75.48.026 45.7zm4.326-39.025L87.314 0v41.527l-47.318.376zm47.329 39.349l-.011 41.34-47.318-6.678-.066-34.739z"/>
@@ -50,7 +51,7 @@ const DOWNLOADS = [
     os: 'linux',
     label: 'Linux',
     sub: '.deb / .rpm — Ubuntu, Fedora, Arch',
-    url: DL('infinit-code_1.1.0_amd64.deb'),
+    url: DL(`infinit-code_${VERSION}_amd64.deb`),
     icon: (
       <svg width="24" height="28" viewBox="0 0 256 256" fill="currentColor">
         <path d="M236.04 189.11c-2.07-4.06-5.9-7.35-8.32-11.14-2.29-3.59-3.17-7.69-4.7-11.53-2.96-7.41-8.58-13.09-16.12-15.41-3.75-1.16-7.56-.93-11.32-.13-1.49.32-2.97.82-4.49 1-1.37.17-3.38.47-4.46-.41-1.64-1.34-2.57-4.3-3.5-6.2-2.14-4.38-4.26-8.76-6.38-13.15-4.58-9.46-9.02-19-13.14-28.64-2.68-6.27-5.39-12.59-7.07-19.22-1.57-6.2-1.23-12.47-.56-18.72.29-2.74.57-5.48.68-8.22.12-2.86.06-5.72-.08-8.58-.28-5.86-1.42-11.72-4.11-16.93-2.74-5.3-7.44-9.59-12.92-12.04-5.5-2.46-11.43-3.14-17.39-2.87-6.1.28-11.77 2.07-16.81 5.31-5.08 3.26-9.04 7.67-11.42 13.14-2.38 5.47-3.13 11.3-2.99 17.17.07 2.89.29 5.77.22 8.66-.07 2.93-.35 5.88-.75 8.79-1.46 10.56-5.68 20.29-10.01 30.05-4.37 9.82-8.87 19.59-13.06 29.49-1.12 2.65-2.11 5.32-3.17 7.98-.9 2.27-2.04 5.1-4.01 6.71-1.36 1.11-3.6.45-5.06.07-2.93-.76-5.73-1.42-8.74-1.3-6.44.25-12.57 3.01-16.66 7.97-4.29 5.19-5.58 11.89-5.08 18.41.46 5.97 2.76 11.76 4.87 17.33.67 1.77 1.4 3.55 1.87 5.39.52 2.07.74 4.02.43 6.12-.54 3.57-2.4 6.88-3.55 10.31-1.19 3.57-1.73 7.37-.77 11.03 1.93 7.3 9.39 12.52 16.72 13.17 4.08.36 7.89-.59 11.4-2.58 3.5-1.99 6.65-4.84 10.13-6.84 7.14-4.12 15.86-5.37 24.03-4.58 5.03.49 9.87 1.86 14.74 3.05 5.19 1.27 10.41 2.47 15.71 3.09 5.3.62 10.82.71 15.79-.93 5.04-1.67 9.07-5.11 12.97-8.57 2.03-1.79 4.06-3.6 6.16-5.3 2.23-1.79 4.65-3.24 7.29-4.31 5.44-2.2 11.11-2.77 16.9-2.77 3.42 0 6.97.13 10.32-.52 3.51-.68 6.8-2.25 9.39-4.73 4.98-4.73 6.3-11.67 5.56-18.28-.32-2.87-1.08-5.71-1.04-8.6.04-2.54.77-5.03 1.83-7.33.52-1.13 1.1-2.23 1.77-3.27z"/>
@@ -180,7 +181,7 @@ export default function DownloadPage() {
           <div style={{ textAlign: 'center', marginBottom: 64, animation: 'fadeUp .5s ease both' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.7)', borderRadius: 100, padding: '5px 16px', fontSize: 11, color: '#8a8d96', fontFamily: "'JetBrains Mono', monospace", marginBottom: 24, boxShadow: '0 1px 0 rgba(255,255,255,0.85) inset, 0 3px 10px rgba(0,0,0,0.08)' }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#3CB043', animation: 'pulse 2s ease-in-out infinite' }} />
-              v1.0.0-beta · Março 2026
+              v{VERSION} · Março 2026
             </div>
             <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: 'clamp(42px,5vw,64px)', fontWeight: 400, color: '#1a1c20', letterSpacing: '-.02em', lineHeight: 1.1, marginBottom: 16 }}>
               Baixar Infinit <em style={{ color: '#4a4d55', fontStyle: 'italic' }}>Code</em>
@@ -443,7 +444,7 @@ export default function DownloadPage() {
 
         {/* Footer */}
         <footer style={{ padding: '24px 40px', borderTop: '1px solid rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(232,233,236,0.6)', backdropFilter: 'blur(12px)' }}>
-          <div style={{ fontSize: 11, color: '#b0b3bc', fontFamily: "'JetBrains Mono', monospace" }}>Infinit Code v1.0.0-beta · MIT License</div>
+          <div style={{ fontSize: 11, color: '#b0b3bc', fontFamily: "'JetBrains Mono', monospace" }}>Infinit Code v{VERSION} · MIT License</div>
           <div style={{ display: 'flex', gap: 20 }}>
             <a href={RELEASES} className="foot-link" style={{ fontSize: 11, color: '#b0b3bc', textDecoration: 'none', transition: 'color .2s' }}>GitHub Releases</a>
             <a href={`${REPO}/blob/main/CHANGELOG.md`} className="foot-link" style={{ fontSize: 11, color: '#b0b3bc', textDecoration: 'none', transition: 'color .2s' }}>Changelog</a>
